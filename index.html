@@ -1,0 +1,2441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>El Tesoro de Capitulín</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --color-primary: #FF6B35;
+            --color-secondary: #4ECDC4;
+            --color-accent: #FFE66D;
+            --color-danger: #FF6B6B;
+            --color-success: #7BC950;
+            --color-purple: #9B59B6;
+            --color-dark: #2C3E50;
+            --color-light: #FFF9E6;
+            --font-title: 'Fredoka One', cursive;
+            --font-body: 'Nunito', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--color-light);
+        }
+
+        /* ============ PANTALLA DE CARGA ============ */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-capitulin {
+            font-size: 80px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        .loading-text {
+            font-family: var(--font-title);
+            font-size: 1.5rem;
+            color: var(--color-accent);
+            margin-top: 20px;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+            border-radius: 10px;
+            animation: loading 2s ease-in-out forwards;
+        }
+
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* ============ CONTENEDOR PRINCIPAL ============ */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* ============ HEADER ============ */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            border: 3px solid var(--color-accent);
+            box-shadow: 0 4px 15px rgba(255, 230, 109, 0.3);
+        }
+
+        .player-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .player-name {
+            font-family: var(--font-title);
+            font-size: 1.1rem;
+            color: var(--color-accent);
+        }
+
+        .player-level {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .resources {
+            display: flex;
+            gap: 20px;
+        }
+
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-weight: 700;
+        }
+
+        .resource-icon {
+            font-size: 1.2rem;
+        }
+
+        .resource-coins {
+            color: var(--color-accent);
+        }
+
+        .resource-stars {
+            color: #FFD700;
+        }
+
+        /* ============ PANTALLA DE INICIO ============ */
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .home-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .game-logo {
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            font-size: 100px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .game-title {
+            font-family: var(--font-title);
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            margin-bottom: 10px;
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 40px;
+        }
+
+        .villain-intro {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(255, 107, 107, 0.2));
+            border: 2px solid var(--color-purple);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 500px;
+        }
+
+        .villain-emoji {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .villain-text {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .btn {
+            font-family: var(--font-title);
+            font-size: 1.2rem;
+            padding: 18px 35px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), #ff8c5a);
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(255, 107, 53, 0.5);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--color-secondary), #6ee7de);
+            color: var(--color-dark);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .btn-small {
+            font-size: 1rem;
+            padding: 12px 25px;
+        }
+
+        .btn-back {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* ============ MAPA DE MUNDOS ============ */
+        .worlds-screen {
+            padding: 20px;
+        }
+
+        .screen-title {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--color-accent);
+        }
+
+        .worlds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+
+        .world-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .world-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), transparent);
+            pointer-events: none;
+        }
+
+        .world-card:hover:not(.locked) {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--color-accent);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .world-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+
+        .world-card.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            opacity: 0.8;
+        }
+
+        .world-card.completed {
+            border-color: var(--color-success);
+        }
+
+        .world-icon {
+            font-size: 70px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .world-name {
+            font-family: var(--font-title);
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            color: var(--color-light);
+        }
+
+        .world-letters {
+            font-size: 1rem;
+            color: var(--color-accent);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .world-progress {
+            background: rgba(0,0,0,0.3);
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .world-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-success), #a8e063);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .world-stars {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            font-size: 1.3rem;
+        }
+
+        .star-empty {
+            opacity: 0.3;
+        }
+
+        /* ============ PANTALLA DE NIVELES ============ */
+        .levels-screen {
+            padding: 20px;
+        }
+
+        .world-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+        }
+
+        .world-header-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .world-header-name {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            color: var(--color-accent);
+        }
+
+        .world-header-letters {
+            color: rgba(255,255,255,0.7);
+            margin-top: 5px;
+        }
+
+        .levels-path {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .level-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-family: var(--font-title);
+            font-size: 1.5rem;
+            border: 4px solid transparent;
+        }
+
+        .level-node.available {
+            background: linear-gradient(135deg, var(--color-primary), #ff8c5a);
+            color: white;
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4); }
+            50% { box-shadow: 0 5px 30px rgba(255, 107, 53, 0.7); }
+        }
+
+        .level-node.available:hover {
+            transform: scale(1.15);
+        }
+
+        .level-node.completed {
+            background: linear-gradient(135deg, var(--color-success), #a8e063);
+            color: white;
+        }
+
+        .level-node.locked {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.3);
+            cursor: not-allowed;
+        }
+
+        .level-node.boss {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--color-purple), #c471ed);
+            animation: bossGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes bossGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(155, 89, 182, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(155, 89, 182, 0.8); }
+        }
+
+        .level-stars {
+            position: absolute;
+            bottom: -10px;
+            display: flex;
+            gap: 2px;
+            font-size: 0.8rem;
+        }
+
+        /* ============ PANTALLA DE JUEGO ============ */
+        .game-screen {
+            padding: 20px;
+        }
+
+        .game-hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+        }
+
+        .hud-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .hud-level {
+            font-family: var(--font-title);
+            font-size: 1.2rem;
+            color: var(--color-accent);
+        }
+
+        .hud-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-secondary), var(--color-success));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .hud-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hud-lives {
+            display: flex;
+            gap: 5px;
+            font-size: 1.5rem;
+        }
+
+        .life-lost {
+            opacity: 0.2;
+        }
+
+        .hud-timer {
+            font-family: var(--font-title);
+            font-size: 1.3rem;
+            color: var(--color-accent);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .hud-timer.warning {
+            color: var(--color-danger);
+            animation: timerPulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* ============ ÁREA DE JUEGO ============ */
+        .game-area {
+            background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+            border-radius: 30px;
+            padding: 40px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-area::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .challenge-container {
+            text-align: center;
+            z-index: 1;
+        }
+
+        .challenge-type {
+            font-family: var(--font-title);
+            font-size: 1rem;
+            color: var(--color-secondary);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .challenge-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: floatSmall 2s ease-in-out infinite;
+        }
+
+        @keyframes floatSmall {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .challenge-instruction {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+        }
+
+        /* Cofre de palabras */
+        .word-display {
+            font-family: var(--font-title);
+            font-size: clamp(2.5rem, 10vw, 4rem);
+            color: var(--color-accent);
+            text-shadow: 0 4px 20px rgba(255, 230, 109, 0.3);
+            margin-bottom: 30px;
+            padding: 20px 40px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            border: 3px solid rgba(255, 230, 109, 0.3);
+        }
+
+        .speak-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-secondary), #6ee7de);
+            border: none;
+            cursor: pointer;
+            font-size: 35px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+            margin-bottom: 30px;
+        }
+
+        .speak-button:hover {
+            transform: scale(1.1);
+        }
+
+        .speak-button:active {
+            transform: scale(0.95);
+        }
+
+        .speak-button.speaking {
+            animation: speakPulse 0.3s ease-in-out infinite;
+        }
+
+        @keyframes speakPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* Opciones de respuesta */
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            font-family: var(--font-title);
+            font-size: 1.3rem;
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.1);
+            border: 3px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .option-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: var(--color-accent);
+            transform: translateY(-3px);
+        }
+
+        .option-btn.correct {
+            background: linear-gradient(135deg, var(--color-success), #a8e063);
+            border-color: var(--color-success);
+            animation: correctPop 0.5s ease;
+        }
+
+        .option-btn.incorrect {
+            background: linear-gradient(135deg, var(--color-danger), #ff8e8e);
+            border-color: var(--color-danger);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Puzzle de sílabas */
+        .syllables-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .syllable-piece {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, var(--color-primary), #ff8c5a);
+            border-radius: 15px;
+            color: white;
+            cursor: grab;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+            user-select: none;
+        }
+
+        .syllable-piece:hover {
+            transform: scale(1.1);
+        }
+
+        .syllable-piece.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .syllable-piece.selected {
+            background: linear-gradient(135deg, var(--color-secondary), #6ee7de);
+            transform: scale(1.1);
+        }
+
+        .word-builder {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+            min-height: 70px;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            border: 3px dashed rgba(255,255,255,0.3);
+            min-width: 250px;
+        }
+
+        .word-builder-piece {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--color-accent), #ffd93d);
+            border-radius: 10px;
+            color: var(--color-dark);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Completar palabra (puente) */
+        .word-with-gap {
+            font-family: var(--font-title);
+            font-size: clamp(2rem, 8vw, 3rem);
+            color: var(--color-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 30px;
+        }
+
+        .word-gap {
+            width: 100px;
+            height: 60px;
+            border: 4px dashed var(--color-accent);
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px;
+            background: rgba(255, 230, 109, 0.1);
+        }
+
+        .word-gap.filled {
+            background: linear-gradient(135deg, var(--color-accent), #ffd93d);
+            border-style: solid;
+            color: var(--color-dark);
+        }
+
+        /* ============ FEEDBACK ============ */
+        .feedback-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-overlay.show {
+            display: flex;
+        }
+
+        .feedback-content {
+            text-align: center;
+            padding: 40px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .feedback-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+        }
+
+        .feedback-text {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+
+        .feedback-correct .feedback-text {
+            color: var(--color-success);
+        }
+
+        .feedback-incorrect .feedback-text {
+            color: var(--color-danger);
+        }
+
+        .coins-earned {
+            font-size: 1.5rem;
+            color: var(--color-accent);
+            margin-bottom: 20px;
+        }
+
+        /* ============ RESULTADOS DE NIVEL ============ */
+        .results-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .results-overlay.show {
+            display: flex;
+        }
+
+        .results-content {
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .results-title {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            color: var(--color-accent);
+            margin-bottom: 20px;
+        }
+
+        .results-stars {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        .results-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .stat-label {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .results-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        /* ============ CAPITULIN ANIMADO ============ */
+        .capitulin-mascot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 60px;
+            z-index: 100;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
+
+        .capitulin-mascot:hover {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .capitulin-mascot.celebrating {
+            animation: celebrate 0.5s ease-in-out;
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-15deg); }
+            50% { transform: scale(1.2) rotate(15deg); }
+            75% { transform: scale(1.2) rotate(-15deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .capitulin-speech {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: white;
+            color: var(--color-dark);
+            padding: 15px 20px;
+            border-radius: 20px;
+            max-width: 250px;
+            font-size: 0.95rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            display: none;
+            animation: popIn 0.3s ease;
+        }
+
+        .capitulin-speech.show {
+            display: block;
+        }
+
+        .capitulin-speech::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 30px;
+            border: 10px solid transparent;
+            border-top-color: white;
+        }
+
+        /* ============ EFECTOS ESPECIALES ============ */
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 768px) {
+            .game-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .resources {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .game-hud {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .hud-left, .hud-right {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .progress-bar {
+                width: 100px;
+            }
+
+            .game-area {
+                padding: 20px;
+                min-height: 350px;
+            }
+
+            .option-btn {
+                min-width: 120px;
+                padding: 12px 20px;
+                font-size: 1.1rem;
+            }
+
+            .level-node {
+                width: 60px;
+                height: 60px;
+                font-size: 1.2rem;
+            }
+
+            .level-node.boss {
+                width: 80px;
+                height: 80px;
+            }
+
+            .capitulin-mascot {
+                font-size: 45px;
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+
+        /* ============ DUELO CON BORRÓN ============ */
+        .boss-battle-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .boss-icon {
+            font-size: 80px;
+            animation: bossFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes bossFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.1); }
+        }
+
+        .boss-health-bar {
+            width: 100%;
+            max-width: 400px;
+            height: 25px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px auto;
+            border: 3px solid var(--color-purple);
+        }
+
+        .boss-health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-danger), #ff8e8e);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .boss-name {
+            font-family: var(--font-title);
+            font-size: 1.5rem;
+            color: var(--color-purple);
+            margin-bottom: 10px;
+        }
+
+        /* ============ PANTALLA GAME OVER ============ */
+        .gameover-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .gameover-overlay.show {
+            display: flex;
+        }
+
+        .gameover-content {
+            text-align: center;
+            animation: slideUp 0.5s ease;
+        }
+
+        .gameover-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+        }
+
+        .gameover-title {
+            font-family: var(--font-title);
+            font-size: 2.5rem;
+            color: var(--color-danger);
+            margin-bottom: 20px;
+        }
+
+        .gameover-message {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de carga -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-capitulin">🦊</div>
+        <div class="loading-text">Cargando aventura...</div>
+        <div class="loading-bar">
+            <div class="loading-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="app-container">
+        <!-- Header con info del jugador -->
+        <header class="game-header" id="gameHeader" style="display: none;">
+            <div class="player-info">
+                <div class="avatar">🦊</div>
+                <div class="player-stats">
+                    <div class="player-name">Explorador</div>
+                    <div class="player-level">Nivel <span id="playerLevel">1</span></div>
+                </div>
+            </div>
+            <div class="resources">
+                <div class="resource resource-coins">
+                    <span class="resource-icon">🪙</span>
+                    <span id="totalCoins">0</span>
+                </div>
+                <div class="resource resource-stars">
+                    <span class="resource-icon">⭐</span>
+                    <span id="totalStars">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- PANTALLA DE INICIO -->
+        <section class="screen home-screen active" id="homeScreen">
+            <div class="game-logo">
+                <span class="logo-icon">🦊</span>
+            </div>
+            <h1 class="game-title">El Tesoro de Capitulín</h1>
+            <p class="game-subtitle">¡Una aventura para aprender a leer!</p>
+
+            <div class="villain-intro">
+                <div class="villain-emoji">👿</div>
+                <p class="villain-text">
+                    El malvado <strong>Borrón</strong> ha robado las <strong>7 Gemas de la Sabiduría</strong> 
+                    y las ha escondido en mundos mágicos. ¡Ayuda a Capitulín a recuperarlas 
+                    leyendo palabras y superando desafíos!
+                </p>
+            </div>
+
+            <div class="menu-buttons">
+                <button class="btn btn-primary" onclick="startGame()">
+                    🗺️ ¡Comenzar Aventura!
+                </button>
+                <button class="btn btn-secondary" onclick="showInstructions()">
+                    📖 Cómo Jugar
+                </button>
+                <button class="btn btn-back btn-small" onclick="showVoiceSettings()" style="margin-top: 10px;">
+                    🔊 Configurar Voz
+                </button>
+            </div>
+            
+            <!-- Selector de voz -->
+            <div id="voiceSettings" style="display: none; margin-top: 20px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                <h3 style="color: var(--color-accent); margin-bottom: 15px;">🔊 Seleccionar Voz</h3>
+                <select id="voiceSelector" onchange="changeVoice()" style="width: 100%; padding: 12px; border-radius: 10px; font-size: 1rem; margin-bottom: 15px;">
+                    <option value="">Cargando voces...</option>
+                </select>
+                <button class="btn btn-secondary btn-small" onclick="testVoice()">🔊 Probar: "Hola, soy Capitulín"</button>
+                <p id="voiceStatus" style="margin-top: 10px; font-size: 0.9rem; color: rgba(255,255,255,0.7);"></p>
+            </div>
+        </section>
+
+        <!-- PANTALLA DE MUNDOS -->
+        <section class="screen worlds-screen" id="worldsScreen">
+            <button class="btn btn-back btn-small" onclick="showScreen('homeScreen')" style="margin-bottom: 20px;">
+                ← Volver
+            </button>
+            <h2 class="screen-title">🗺️ Mapa de Mundos</h2>
+            <div class="worlds-grid" id="worldsGrid">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </section>
+
+        <!-- PANTALLA DE NIVELES -->
+        <section class="screen levels-screen" id="levelsScreen">
+            <button class="btn btn-back btn-small" onclick="showScreen('worldsScreen')" style="margin-bottom: 20px;">
+                ← Volver al Mapa
+            </button>
+            <div class="world-header" id="worldHeader">
+                <div class="world-header-icon">🏝️</div>
+                <h2 class="world-header-name">Isla de las Vocales</h2>
+                <p class="world-header-letters">Letras: A, E, I, O, U</p>
+            </div>
+            <div class="levels-path" id="levelsPath">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </section>
+
+        <!-- PANTALLA DE JUEGO -->
+        <section class="screen game-screen" id="gameScreen">
+            <div class="game-hud">
+                <div class="hud-left">
+                    <button class="btn btn-back btn-small" onclick="exitLevel()">✕</button>
+                    <div class="hud-level">Nivel <span id="currentLevel">1</span></div>
+                    <div class="hud-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text"><span id="currentWord">0</span>/<span id="totalWords">10</span></span>
+                    </div>
+                </div>
+                <div class="hud-right">
+                    <div class="hud-lives" id="livesContainer">
+                        ❤️❤️❤️
+                    </div>
+                    <div class="hud-timer" id="timerDisplay" style="display: none;">
+                        ⏱️ <span id="timerValue">30</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-area" id="gameArea">
+                <!-- El contenido del reto se genera dinámicamente -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Mascota Capitulín -->
+    <div class="capitulin-mascot" id="capitulinMascot" onclick="capitulinTalk()">🦊</div>
+    <div class="capitulin-speech" id="capitulinSpeech">¡Hola! Haz clic en el altavoz para escuchar la palabra.</div>
+
+    <!-- Overlay de feedback -->
+    <div class="feedback-overlay" id="feedbackOverlay">
+        <div class="feedback-content" id="feedbackContent">
+            <div class="feedback-icon">✨</div>
+            <div class="feedback-text">¡Correcto!</div>
+            <div class="coins-earned">+10 🪙</div>
+        </div>
+    </div>
+
+    <!-- Overlay de resultados -->
+    <div class="results-overlay" id="resultsOverlay">
+        <div class="results-content">
+            <h2 class="results-title">¡Nivel Completado!</h2>
+            <div class="results-stars" id="resultsStars">⭐⭐⭐</div>
+            <div class="results-stats">
+                <div class="stat-row">
+                    <span class="stat-label">Palabras correctas</span>
+                    <span class="stat-value" id="resultCorrect">10/10</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Monedas ganadas</span>
+                    <span class="stat-value" id="resultCoins">+50 🪙</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Tiempo</span>
+                    <span class="stat-value" id="resultTime">45s</span>
+                </div>
+            </div>
+            <div class="results-buttons">
+                <button class="btn btn-back btn-small" onclick="exitLevel()">🗺️ Mapa</button>
+                <button class="btn btn-primary btn-small" onclick="nextLevel()">▶️ Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay de Game Over -->
+    <div class="gameover-overlay" id="gameoverOverlay">
+        <div class="gameover-content">
+            <div class="gameover-icon">😢</div>
+            <h2 class="gameover-title">¡Oh no!</h2>
+            <p class="gameover-message">Se acabaron las vidas. ¡Pero no te rindas!</p>
+            <div class="results-buttons">
+                <button class="btn btn-back btn-small" onclick="exitLevel()">🗺️ Mapa</button>
+                <button class="btn btn-primary btn-small" onclick="retryLevel()">🔄 Reintentar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURACIÓN DEL JUEGO ====================
+
+        // Banco de palabras por fase fonética (solo letras ya trabajadas)
+        const WORD_BANK = {
+            1: { // Vocales
+                letters: ['a', 'e', 'i', 'o', 'u'],
+                words: ['a', 'e', 'i', 'o', 'u', 'oí', 'ío', 'ea', 'eo', 'ou', 'ai', 'au', 'ei', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'ua', 'ue', 'ui', 'uo']
+            },
+            2: { // + M, P
+                letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p'],
+                words: ['mamá', 'papá', 'mapa', 'ama', 'amo', 'mimo', 'mima', 'puma', 'pipa', 'pepe', 'pupa', 'memo', 'pomo', 'papi', 'mami', 'aupa', 'upa', 'pia', 'pío', 'mío']
+            },
+            3: { // + S, L
+                letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l'],
+                words: ['mesa', 'sala', 'pala', 'suma', 'peso', 'oso', 'ala', 'sol', 'sal', 'mula', 'lima', 'lupa', 'lama', 'liso', 'masa', 'pelo', 'piel', 'miel', 'piso', 'sopa', 'sapo', 'lapo', 'palo', 'malo', 'polo', 'mole', 'silo', 'pesa', 'losa', 'isla']
+            },
+            4: { // + T, N
+                letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l', 't', 'n'],
+                words: ['tapa', 'pato', 'meta', 'nota', 'luna', 'mono', 'nata', 'nena', 'toma', 'tela', 'lata', 'seta', 'mano', 'pan', 'son', 'tan', 'ten', 'sin', 'tos', 'tío', 'nene', 'nata', 'manta', 'lente', 'planta', 'tonto', 'lento', 'monte', 'pinta', 'punta', 'menta', 'tinta', 'antes', 'tanto', 'santo', 'peine', 'patín', 'melón', 'limón', 'salón', 'tapón', 'sillón', 'maleta', 'paleta', 'pelota', 'tomate', 'patata']
+            },
+            5: { // + D, B, C (ca, co, cu)
+                letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l', 't', 'n', 'd', 'b', 'c'],
+                words: ['dedo', 'dado', 'día', 'dos', 'don', 'den', 'boca', 'bola', 'bota', 'bueno', 'banco', 'balón', 'botón', 'cama', 'casa', 'cuna', 'copa', 'codo', 'cono', 'col', 'come', 'cosa', 'boda', 'nido', 'moda', 'todo', 'cada', 'capo', 'saco', 'poco', 'loco', 'taco', 'disco', 'casco', 'duende', 'conde', 'dama', 'diana', 'dibujo', 'cubo', 'cola', 'cuento', 'comida', 'camino', 'camisa', 'cocina', 'caballo', 'calabaza']
+            },
+            6: { // + R (suave), RR
+                letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l', 't', 'n', 'd', 'b', 'c', 'r'],
+                words: ['pera', 'cara', 'oro', 'ara', 'aro', 'era', 'mora', 'loro', 'toro', 'coro', 'puro', 'muro', 'caro', 'raro', 'para', 'pero', 'cura', 'dura', 'perro', 'carro', 'torre', 'barro', 'burro', 'gorra', 'porra', 'tierra', 'sierra', 'rosa', 'rana', 'rata', 'remo', 'ropa', 'rico', 'rama', 'rueda', 'risa', 'ratón', 'rincón', 'rápido', 'torero', 'dinero', 'carrera', 'barrera', 'corona', 'tesoro', 'pirata', 'marinero']
+            },
+            7: { // + Trabadas (pl, pr, bl, br, cl, cr, fl, fr, gl, gr, tr, dr)
+                letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l', 't', 'n', 'd', 'b', 'c', 'r', 'f', 'g'],
+                words: ['plato', 'pluma', 'plano', 'plata', 'pleno', 'primo', 'prueba', 'precio', 'prisa', 'prado', 'blusa', 'blanco', 'blando', 'bruja', 'brisa', 'brazo', 'brote', 'bruto', 'clase', 'claro', 'clima', 'club', 'crema', 'cruz', 'crudo', 'criado', 'flaco', 'flor', 'flan', 'flauta', 'fruta', 'frío', 'frase', 'freno', 'globo', 'gloria', 'grande', 'grano', 'gratis', 'grupo', 'grillo', 'tren', 'tres', 'truco', 'triste', 'trigo', 'drama', 'dragón', 'cofre', 'tesoro', 'piedra', 'palabra', 'problema', 'trabajo']
+            }
+        };
+
+        // Configuración de mundos
+        const WORLDS = [
+            { id: 1, name: 'Isla de las Vocales', icon: '🏝️', letters: 'A, E, I, O, U', boss: 'Pulpo Confuso', bossIcon: '🐙', levels: 8 },
+            { id: 2, name: 'Puerto Pirata', icon: '🏴‍☠️', letters: '+ M, P', boss: 'Capitán Mudo', bossIcon: '🦜', levels: 10 },
+            { id: 3, name: 'Bosque Susurrante', icon: '🌲', letters: '+ S, L', boss: 'Serpiente Siseante', bossIcon: '🐍', levels: 10 },
+            { id: 4, name: 'Montaña Tronadora', icon: '🏔️', letters: '+ T, N', boss: 'Trol Tartamudo', bossIcon: '👹', levels: 10 },
+            { id: 5, name: 'Castillo Oscuro', icon: '🏰', letters: '+ D, B, C', boss: 'Bruja Balbuceante', bossIcon: '🧙‍♀️', levels: 10 },
+            { id: 6, name: 'Cueva Rugiente', icon: '🌋', letters: '+ R, RR', boss: 'Dragón Ronco', bossIcon: '🐲', levels: 10 },
+            { id: 7, name: 'Torre de Borrón', icon: '🗼', letters: 'Trabadas', boss: '¡BORRÓN!', bossIcon: '👿', levels: 12 }
+        ];
+
+        // Tipos de retos
+        const CHALLENGE_TYPES = ['chest', 'syllables', 'target', 'bridge', 'parrot'];
+        const BOSS_CHALLENGE = 'boss';
+
+        // Frases de Capitulín
+        const CAPITULIN_PHRASES = {
+            correct: ['¡Muy bien! 🎉', '¡Genial! 🌟', '¡Eres increíble! ✨', '¡Sigue así! 💪', '¡Excelente! 🏆'],
+            incorrect: ['¡Casi! Inténtalo de nuevo 💪', '¡Tú puedes! 🌟', 'No te rindas 😊', '¡Ánimo! 🎯'],
+            hint: ['Escucha bien la palabra 👂', 'Fíjate en las letras 👀', 'Piensa despacio 🧠'],
+            welcome: ['¡Hola, explorador! 🦊', '¡Vamos a aprender! 📚', '¿Listo para la aventura? 🗺️']
+        };
+
+        // ==================== ESTADO DEL JUEGO ====================
+        let gameState = {
+            coins: 0,
+            stars: 0,
+            playerLevel: 1,
+            currentWorld: 1,
+            currentLevel: 1,
+            worldsProgress: {},
+            currentChallenge: null,
+            lives: 3,
+            wordsCompleted: 0,
+            totalWordsInLevel: 10,
+            correctAnswers: 0,
+            startTime: null,
+            timer: null,
+            timerValue: 30,
+            bossHealth: 100
+        };
+
+        // Inicializar progreso de mundos
+        WORLDS.forEach(world => {
+            gameState.worldsProgress[world.id] = {
+                unlocked: world.id === 1,
+                completed: false,
+                levelsCompleted: 0,
+                starsPerLevel: {}
+            };
+        });
+
+        // ==================== SÍNTESIS DE VOZ ====================
+        const synth = window.speechSynthesis;
+        let spanishVoice = null;
+        let voicesLoaded = false;
+
+        function getSpanishVoice() {
+            const voices = synth.getVoices();
+            console.log('Voces disponibles:', voices.map(v => `${v.name} (${v.lang})`));
+            
+            // Prioridad de voces españolas (de mejor a peor)
+            const priorities = [
+                'es-ES',  // España
+                'es-MX',  // México
+                'es-AR',  // Argentina
+                'es-CO',  // Colombia
+                'es-CL',  // Chile
+                'es'      // Español genérico
+            ];
+            
+            // Buscar voces preferidas de Google/Microsoft que suenan mejor
+            const preferredVoices = [
+                'Google español',
+                'Microsoft Helena',
+                'Microsoft Laura',
+                'Mónica',
+                'Jorge',
+                'Diego',
+                'Paulina'
+            ];
+            
+            // Primero buscar voces preferidas
+            for (const preferred of preferredVoices) {
+                const voice = voices.find(v => 
+                    v.name.includes(preferred) && v.lang.startsWith('es')
+                );
+                if (voice) {
+                    console.log('Voz seleccionada (preferida):', voice.name);
+                    return voice;
+                }
+            }
+            
+            // Si no, buscar por prioridad de idioma
+            for (const lang of priorities) {
+                const voice = voices.find(v => v.lang === lang || v.lang.startsWith(lang));
+                if (voice) {
+                    console.log('Voz seleccionada (por idioma):', voice.name, voice.lang);
+                    return voice;
+                }
+            }
+            
+            // Última opción: cualquier voz que contenga "es" en el idioma
+            const anySpanish = voices.find(v => v.lang.toLowerCase().includes('es'));
+            if (anySpanish) {
+                console.log('Voz seleccionada (cualquier español):', anySpanish.name);
+                return anySpanish;
+            }
+            
+            console.warn('No se encontró voz en español, usando primera disponible');
+            return voices[0];
+        }
+
+        function initVoices() {
+            const voices = synth.getVoices();
+            if (voices.length > 0) {
+                spanishVoice = getSpanishVoice();
+                voicesLoaded = true;
+            }
+        }
+
+        // Las voces pueden tardar en cargar
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = initVoices;
+        }
+        
+        // Intentar cargar inmediatamente también
+        initVoices();
+        
+        // Reintentar después de un momento por si acaso
+        setTimeout(initVoices, 100);
+        setTimeout(initVoices, 500);
+        setTimeout(initVoices, 1000);
+
+        function speak(text, rate = 0.8) {
+            // Cancelar cualquier habla anterior
+            synth.cancel();
+            
+            // Asegurar que las voces están cargadas
+            if (!voicesLoaded || !spanishVoice) {
+                initVoices();
+            }
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Configurar voz española
+            if (spanishVoice) {
+                utterance.voice = spanishVoice;
+            }
+            
+            // IMPORTANTE: Forzar idioma español aunque no haya voz específica
+            utterance.lang = 'es-ES';
+            utterance.rate = rate;
+            utterance.pitch = 1.1;
+            utterance.volume = 1;
+            
+            const speakBtn = document.querySelector('.speak-button');
+            if (speakBtn) {
+                speakBtn.classList.add('speaking');
+                utterance.onend = () => speakBtn.classList.remove('speaking');
+                utterance.onerror = () => speakBtn.classList.remove('speaking');
+            }
+            
+            // Pequeño retraso para asegurar que el cancel() se procesó
+            setTimeout(() => {
+                synth.speak(utterance);
+            }, 50);
+        }
+        
+        // Debug: mostrar voz seleccionada en consola
+        setTimeout(() => {
+            console.log('Voz final configurada:', spanishVoice ? spanishVoice.name : 'ninguna');
+            populateVoiceSelector();
+        }, 1500);
+        
+        function showVoiceSettings() {
+            const settings = document.getElementById('voiceSettings');
+            settings.style.display = settings.style.display === 'none' ? 'block' : 'none';
+            populateVoiceSelector();
+        }
+        
+        function populateVoiceSelector() {
+            const selector = document.getElementById('voiceSelector');
+            const voices = synth.getVoices();
+            
+            if (voices.length === 0) {
+                selector.innerHTML = '<option value="">No hay voces disponibles</option>';
+                return;
+            }
+            
+            // Filtrar y ordenar voces (español primero)
+            const sortedVoices = [...voices].sort((a, b) => {
+                const aSpanish = a.lang.startsWith('es') ? 0 : 1;
+                const bSpanish = b.lang.startsWith('es') ? 0 : 1;
+                if (aSpanish !== bSpanish) return aSpanish - bSpanish;
+                return a.name.localeCompare(b.name);
+            });
+            
+            selector.innerHTML = sortedVoices.map((voice, index) => {
+                const isSpanish = voice.lang.startsWith('es');
+                const flag = isSpanish ? '🇪🇸' : '🌐';
+                const selected = spanishVoice && voice.name === spanishVoice.name ? 'selected' : '';
+                return `<option value="${index}" ${selected}>${flag} ${voice.name} (${voice.lang})</option>`;
+            }).join('');
+            
+            // Mostrar estado actual
+            const status = document.getElementById('voiceStatus');
+            if (spanishVoice) {
+                const isSpanish = spanishVoice.lang.startsWith('es');
+                status.innerHTML = isSpanish 
+                    ? `✅ Voz española detectada: ${spanishVoice.name}`
+                    : `⚠️ Usando voz no española: ${spanishVoice.name}. Selecciona una voz española arriba.`;
+                status.style.color = isSpanish ? 'var(--color-success)' : 'var(--color-accent)';
+            } else {
+                status.innerHTML = '❌ No se detectó ninguna voz';
+                status.style.color = 'var(--color-danger)';
+            }
+        }
+        
+        function changeVoice() {
+            const selector = document.getElementById('voiceSelector');
+            const voices = synth.getVoices();
+            const sortedVoices = [...voices].sort((a, b) => {
+                const aSpanish = a.lang.startsWith('es') ? 0 : 1;
+                const bSpanish = b.lang.startsWith('es') ? 0 : 1;
+                if (aSpanish !== bSpanish) return aSpanish - bSpanish;
+                return a.name.localeCompare(b.name);
+            });
+            
+            const selectedIndex = parseInt(selector.value);
+            if (!isNaN(selectedIndex) && sortedVoices[selectedIndex]) {
+                spanishVoice = sortedVoices[selectedIndex];
+                voicesLoaded = true;
+                
+                // Guardar preferencia
+                localStorage.setItem('capitulinVoice', spanishVoice.name);
+                
+                const status = document.getElementById('voiceStatus');
+                status.innerHTML = `✅ Voz cambiada a: ${spanishVoice.name}`;
+                status.style.color = 'var(--color-success)';
+                
+                // Probar la voz
+                testVoice();
+            }
+        }
+        
+        function testVoice() {
+            speak('Hola, soy Capitulín. ¡Vamos a aprender a leer!', 0.9);
+        }
+        
+        // Cargar voz guardada
+        function loadSavedVoice() {
+            const savedVoiceName = localStorage.getItem('capitulinVoice');
+            if (savedVoiceName) {
+                const voices = synth.getVoices();
+                const savedVoice = voices.find(v => v.name === savedVoiceName);
+                if (savedVoice) {
+                    spanishVoice = savedVoice;
+                    console.log('Voz cargada de preferencias:', savedVoiceName);
+                }
+            }
+        }
+        
+        // Intentar cargar voz guardada
+        setTimeout(loadSavedVoice, 1000);
+
+        // ==================== FUNCIONES DE PANTALLA ====================
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            const header = document.getElementById('gameHeader');
+            header.style.display = screenId === 'homeScreen' ? 'none' : 'flex';
+            
+            updateUI();
+        }
+
+        function startGame() {
+            showScreen('worldsScreen');
+            renderWorlds();
+        }
+
+        function showInstructions() {
+            capitulinSay('🎮 Lee las palabras para abrir cofres y avanzar. ¡Completa mundos para desbloquear más! 🗺️');
+        }
+
+        // ==================== RENDERIZADO DE MUNDOS ====================
+        function renderWorlds() {
+            const grid = document.getElementById('worldsGrid');
+            grid.innerHTML = '';
+
+            WORLDS.forEach(world => {
+                const progress = gameState.worldsProgress[world.id];
+                const progressPercent = (progress.levelsCompleted / world.levels) * 100;
+                const totalStars = Object.values(progress.starsPerLevel).reduce((a, b) => a + b, 0);
+                const maxStars = world.levels * 3;
+
+                const card = document.createElement('div');
+                card.className = `world-card ${progress.unlocked ? '' : 'locked'} ${progress.completed ? 'completed' : ''}`;
+                card.innerHTML = `
+                    <span class="world-icon">${world.icon}</span>
+                    <h3 class="world-name">${world.name}</h3>
+                    <p class="world-letters">${world.letters}</p>
+                    <div class="world-progress">
+                        <div class="world-progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="world-stars">
+                        ${renderStars(totalStars, maxStars, true)}
+                    </div>
+                `;
+
+                if (progress.unlocked) {
+                    card.onclick = () => selectWorld(world.id);
+                }
+
+                grid.appendChild(card);
+            });
+        }
+
+        function renderStars(earned, max, showCount = false) {
+            if (showCount) {
+                return `⭐ ${earned}/${max}`;
+            }
+            let stars = '';
+            for (let i = 0; i < 3; i++) {
+                stars += i < earned ? '⭐' : '<span class="star-empty">⭐</span>';
+            }
+            return stars;
+        }
+
+        // ==================== SELECCIÓN DE MUNDO Y NIVEL ====================
+        function selectWorld(worldId) {
+            gameState.currentWorld = worldId;
+            showScreen('levelsScreen');
+            renderLevels();
+        }
+
+        function renderLevels() {
+            const world = WORLDS.find(w => w.id === gameState.currentWorld);
+            const progress = gameState.worldsProgress[world.id];
+
+            // Header del mundo
+            const header = document.getElementById('worldHeader');
+            header.innerHTML = `
+                <div class="world-header-icon">${world.icon}</div>
+                <h2 class="world-header-name">${world.name}</h2>
+                <p class="world-header-letters">Letras: ${world.letters}</p>
+            `;
+
+            // Niveles
+            const path = document.getElementById('levelsPath');
+            path.innerHTML = '';
+
+            for (let i = 1; i <= world.levels; i++) {
+                const isBoss = i === world.levels;
+                const isCompleted = i <= progress.levelsCompleted;
+                const isAvailable = i <= progress.levelsCompleted + 1;
+                const stars = progress.starsPerLevel[i] || 0;
+
+                const node = document.createElement('div');
+                node.className = `level-node ${isCompleted ? 'completed' : isAvailable ? 'available' : 'locked'} ${isBoss ? 'boss' : ''}`;
+                node.innerHTML = isBoss ? world.bossIcon : i;
+
+                if (isCompleted && !isBoss) {
+                    node.innerHTML += `<div class="level-stars">${renderStars(stars, 3)}</div>`;
+                }
+
+                if (isAvailable) {
+                    node.onclick = () => startLevel(i, isBoss);
+                }
+
+                path.appendChild(node);
+            }
+        }
+
+        // ==================== INICIO DE NIVEL ====================
+        function startLevel(levelNum, isBoss = false) {
+            gameState.currentLevel = levelNum;
+            gameState.lives = 3;
+            gameState.wordsCompleted = 0;
+            gameState.correctAnswers = 0;
+            gameState.totalWordsInLevel = isBoss ? 15 : 10;
+            gameState.startTime = Date.now();
+            gameState.bossHealth = 100;
+
+            showScreen('gameScreen');
+            updateLivesDisplay();
+            updateProgressDisplay();
+
+            document.getElementById('currentLevel').textContent = levelNum;
+            document.getElementById('timerDisplay').style.display = isBoss ? 'block' : 'none';
+
+            if (isBoss) {
+                startBossTimer();
+            }
+
+            nextChallenge(isBoss);
+        }
+
+        // ==================== GENERACIÓN DE RETOS ====================
+        function nextChallenge(isBoss = false) {
+            if (gameState.wordsCompleted >= gameState.totalWordsInLevel) {
+                endLevel(true);
+                return;
+            }
+
+            const worldBank = WORD_BANK[gameState.currentWorld];
+            const words = worldBank.words;
+            const word = words[Math.floor(Math.random() * words.length)];
+
+            let challengeType;
+            if (isBoss) {
+                challengeType = BOSS_CHALLENGE;
+            } else {
+                // Variar tipos de reto
+                const availableTypes = ['chest', 'target'];
+                if (word.length >= 4) {
+                    availableTypes.push('syllables', 'bridge');
+                }
+                if (gameState.currentWorld >= 2) {
+                    availableTypes.push('parrot');
+                }
+                challengeType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+            }
+
+            gameState.currentChallenge = { word, type: challengeType };
+
+            renderChallenge(challengeType, word, isBoss);
+        }
+
+        function renderChallenge(type, word, isBoss) {
+            const gameArea = document.getElementById('gameArea');
+            
+            switch(type) {
+                case 'chest':
+                    renderChestChallenge(gameArea, word);
+                    break;
+                case 'syllables':
+                    renderSyllablesChallenge(gameArea, word);
+                    break;
+                case 'target':
+                    renderTargetChallenge(gameArea, word);
+                    break;
+                case 'bridge':
+                    renderBridgeChallenge(gameArea, word);
+                    break;
+                case 'parrot':
+                    renderParrotChallenge(gameArea, word);
+                    break;
+                case 'boss':
+                    renderBossChallenge(gameArea, word);
+                    break;
+            }
+        }
+
+        // RETO: Cofre (lee la palabra)
+        function renderChestChallenge(container, word) {
+            container.innerHTML = `
+                <div class="challenge-container">
+                    <div class="challenge-type">🗝️ Cofre del Tesoro</div>
+                    <div class="challenge-icon">📦</div>
+                    <p class="challenge-instruction">Escucha y lee esta palabra para abrir el cofre:</p>
+                    <div class="word-display">${word}</div>
+                    <button class="speak-button" onclick="speak('${word}')">🔊</button>
+                    <div class="options-container">
+                        <button class="btn btn-primary" onclick="checkAnswer(true)">✓ ¡La sé!</button>
+                        <button class="btn btn-secondary" onclick="speak('${word}', 0.5)">🐢 Más lento</button>
+                    </div>
+                </div>
+            `;
+            setTimeout(() => speak(word), 500);
+        }
+
+        // RETO: Diana (selecciona la correcta)
+        function renderTargetChallenge(container, word) {
+            const worldBank = WORD_BANK[gameState.currentWorld];
+            let options = [word];
+            
+            while (options.length < 3) {
+                const randomWord = worldBank.words[Math.floor(Math.random() * worldBank.words.length)];
+                if (!options.includes(randomWord)) {
+                    options.push(randomWord);
+                }
+            }
+            
+            options = shuffleArray(options);
+
+            container.innerHTML = `
+                <div class="challenge-container">
+                    <div class="challenge-type">🎯 Diana de Palabras</div>
+                    <div class="challenge-icon">🎯</div>
+                    <p class="challenge-instruction">Escucha y selecciona la palabra correcta:</p>
+                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <div class="options-container">
+                        ${options.map(opt => `
+                            <button class="option-btn" onclick="selectOption(this, '${opt}', '${word}')">${opt}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            setTimeout(() => speak(word), 500);
+        }
+
+        // RETO: Sílabas (forma la palabra)
+        function renderSyllablesChallenge(container, word) {
+            const syllables = splitIntoSyllables(word);
+            const shuffledSyllables = shuffleArray([...syllables]);
+
+            container.innerHTML = `
+                <div class="challenge-container">
+                    <div class="challenge-type">🧩 Puzzle de Sílabas</div>
+                    <div class="challenge-icon">🧩</div>
+                    <p class="challenge-instruction">Escucha y ordena las sílabas:</p>
+                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <div class="syllables-container" id="syllablesSource">
+                        ${shuffledSyllables.map((syl, i) => `
+                            <div class="syllable-piece" onclick="selectSyllable(this)" data-syllable="${syl}">${syl}</div>
+                        `).join('')}
+                    </div>
+                    <div class="word-builder" id="wordBuilder"></div>
+                    <button class="btn btn-primary" onclick="checkSyllables('${word}')" style="margin-top: 20px;">✓ Comprobar</button>
+                </div>
+            `;
+            setTimeout(() => speak(word), 500);
+        }
+
+        let selectedSyllables = [];
+
+        function selectSyllable(element) {
+            const syllable = element.dataset.syllable;
+            
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                selectedSyllables = selectedSyllables.filter(s => s !== syllable);
+            } else {
+                element.classList.add('selected');
+                selectedSyllables.push(syllable);
+            }
+
+            const builder = document.getElementById('wordBuilder');
+            builder.innerHTML = selectedSyllables.map(s => `<div class="word-builder-piece">${s}</div>`).join('');
+        }
+
+        function checkSyllables(correctWord) {
+            const formed = selectedSyllables.join('');
+            if (formed === correctWord) {
+                handleCorrectAnswer();
+            } else {
+                handleIncorrectAnswer();
+            }
+            selectedSyllables = [];
+        }
+
+        // RETO: Puente (completa la palabra)
+        function renderBridgeChallenge(container, word) {
+            const syllables = splitIntoSyllables(word);
+            if (syllables.length < 2) {
+                renderTargetChallenge(container, word);
+                return;
+            }
+
+            const gapIndex = Math.floor(Math.random() * syllables.length);
+            const correctSyllable = syllables[gapIndex];
+            
+            const worldBank = WORD_BANK[gameState.currentWorld];
+            let options = [correctSyllable];
+            
+            // Generar opciones incorrectas
+            while (options.length < 3) {
+                const randomWord = worldBank.words[Math.floor(Math.random() * worldBank.words.length)];
+                const randomSyls = splitIntoSyllables(randomWord);
+                const randomSyl = randomSyls[Math.floor(Math.random() * randomSyls.length)];
+                if (!options.includes(randomSyl) && randomSyl.length > 0) {
+                    options.push(randomSyl);
+                }
+            }
+            
+            options = shuffleArray(options);
+
+            const displayWord = syllables.map((syl, i) => 
+                i === gapIndex ? '<span class="word-gap" id="wordGap"></span>' : syl
+            ).join('');
+
+            container.innerHTML = `
+                <div class="challenge-container">
+                    <div class="challenge-type">🌉 Puente Roto</div>
+                    <div class="challenge-icon">🌉</div>
+                    <p class="challenge-instruction">Completa la palabra para cruzar:</p>
+                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <div class="word-with-gap">${displayWord}</div>
+                    <div class="options-container">
+                        ${options.map(opt => `
+                            <button class="option-btn" onclick="selectBridgeOption(this, '${opt}', '${correctSyllable}')">${opt}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            setTimeout(() => speak(word), 500);
+        }
+
+        function selectBridgeOption(button, selected, correct) {
+            const gap = document.getElementById('wordGap');
+            gap.textContent = selected;
+            gap.classList.add('filled');
+            
+            setTimeout(() => {
+                if (selected === correct) {
+                    handleCorrectAnswer();
+                } else {
+                    handleIncorrectAnswer();
+                }
+            }, 500);
+        }
+
+        // RETO: Loro (escucha y selecciona imagen)
+        function renderParrotChallenge(container, word) {
+            const worldBank = WORD_BANK[gameState.currentWorld];
+            let options = [word];
+            
+            while (options.length < 3) {
+                const randomWord = worldBank.words[Math.floor(Math.random() * worldBank.words.length)];
+                if (!options.includes(randomWord)) {
+                    options.push(randomWord);
+                }
+            }
+            
+            options = shuffleArray(options);
+
+            container.innerHTML = `
+                <div class="challenge-container">
+                    <div class="challenge-type">🦜 Loro Parlanchín</div>
+                    <div class="challenge-icon">🦜</div>
+                    <p class="challenge-instruction">El loro dice una palabra. ¡Selecciona cuál es!</p>
+                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <div class="options-container">
+                        ${options.map(opt => `
+                            <button class="option-btn" onclick="selectOption(this, '${opt}', '${word}')">${opt}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            setTimeout(() => speak(word), 500);
+        }
+
+        // RETO: Jefe
+        function renderBossChallenge(container, word) {
+            const world = WORLDS.find(w => w.id === gameState.currentWorld);
+            const worldBank = WORD_BANK[gameState.currentWorld];
+            
+            let options = [word];
+            while (options.length < 4) {
+                const randomWord = worldBank.words[Math.floor(Math.random() * worldBank.words.length)];
+                if (!options.includes(randomWord)) {
+                    options.push(randomWord);
+                }
+            }
+            options = shuffleArray(options);
+
+            container.innerHTML = `
+                <div class="challenge-container">
+                    <div class="boss-battle-header">
+                        <div class="boss-name">⚔️ ${world.boss}</div>
+                        <div class="boss-icon">${world.bossIcon}</div>
+                        <div class="boss-health-bar">
+                            <div class="boss-health-fill" id="bossHealthFill" style="width: ${gameState.bossHealth}%"></div>
+                        </div>
+                    </div>
+                    <p class="challenge-instruction">¡Lee rápido para derrotar al jefe!</p>
+                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <div class="options-container">
+                        ${options.map(opt => `
+                            <button class="option-btn" onclick="selectBossOption(this, '${opt}', '${word}')">${opt}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            setTimeout(() => speak(word), 300);
+        }
+
+        function selectBossOption(button, selected, correct) {
+            if (selected === correct) {
+                gameState.bossHealth -= 15;
+                document.getElementById('bossHealthFill').style.width = `${Math.max(0, gameState.bossHealth)}%`;
+                handleCorrectAnswer(true);
+            } else {
+                handleIncorrectAnswer(true);
+            }
+        }
+
+        // ==================== FUNCIONES DE RESPUESTA ====================
+        function selectOption(button, selected, correct) {
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(b => b.disabled = true);
+
+            if (selected === correct) {
+                button.classList.add('correct');
+                setTimeout(() => handleCorrectAnswer(), 500);
+            } else {
+                button.classList.add('incorrect');
+                buttons.forEach(b => {
+                    if (b.textContent === correct) b.classList.add('correct');
+                });
+                setTimeout(() => handleIncorrectAnswer(), 800);
+            }
+        }
+
+        function checkAnswer(correct) {
+            if (correct) {
+                handleCorrectAnswer();
+            } else {
+                handleIncorrectAnswer();
+            }
+        }
+
+        function handleCorrectAnswer(isBoss = false) {
+            gameState.wordsCompleted++;
+            gameState.correctAnswers++;
+            
+            const coinsEarned = isBoss ? 15 : 10;
+            gameState.coins += coinsEarned;
+
+            showFeedback(true, coinsEarned);
+            celebrateCapitulin();
+            updateUI();
+            updateProgressDisplay();
+
+            setTimeout(() => {
+                hideFeedback();
+                if (isBoss && gameState.bossHealth <= 0) {
+                    endLevel(true);
+                } else {
+                    nextChallenge(isBoss);
+                }
+            }, 1200);
+        }
+
+        function handleIncorrectAnswer(isBoss = false) {
+            gameState.lives--;
+            gameState.wordsCompleted++;
+            updateLivesDisplay();
+
+            showFeedback(false, 0);
+            capitulinSay(CAPITULIN_PHRASES.incorrect[Math.floor(Math.random() * CAPITULIN_PHRASES.incorrect.length)]);
+
+            setTimeout(() => {
+                hideFeedback();
+                if (gameState.lives <= 0) {
+                    endLevel(false);
+                } else {
+                    nextChallenge(isBoss);
+                }
+            }, 1200);
+        }
+
+        // ==================== UI UPDATES ====================
+        function updateUI() {
+            document.getElementById('totalCoins').textContent = gameState.coins;
+            document.getElementById('totalStars').textContent = gameState.stars;
+            document.getElementById('playerLevel').textContent = gameState.playerLevel;
+        }
+
+        function updateLivesDisplay() {
+            const container = document.getElementById('livesContainer');
+            let hearts = '';
+            for (let i = 0; i < 3; i++) {
+                hearts += i < gameState.lives ? '❤️' : '<span class="life-lost">🖤</span>';
+            }
+            container.innerHTML = hearts;
+        }
+
+        function updateProgressDisplay() {
+            document.getElementById('currentWord').textContent = gameState.wordsCompleted;
+            document.getElementById('totalWords').textContent = gameState.totalWordsInLevel;
+            const percent = (gameState.wordsCompleted / gameState.totalWordsInLevel) * 100;
+            document.getElementById('progressFill').style.width = `${percent}%`;
+        }
+
+        function showFeedback(correct, coins) {
+            const overlay = document.getElementById('feedbackOverlay');
+            const content = document.getElementById('feedbackContent');
+            
+            content.className = `feedback-content ${correct ? 'feedback-correct' : 'feedback-incorrect'}`;
+            content.innerHTML = `
+                <div class="feedback-icon">${correct ? '✨' : '💫'}</div>
+                <div class="feedback-text">${correct ? '¡Correcto!' : '¡Casi!'}</div>
+                ${correct ? `<div class="coins-earned">+${coins} 🪙</div>` : ''}
+            `;
+            
+            overlay.classList.add('show');
+            
+            if (correct) {
+                createConfetti();
+            }
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedbackOverlay').classList.remove('show');
+        }
+
+        // ==================== TIMER (JEFES) ====================
+        function startBossTimer() {
+            gameState.timerValue = 60;
+            updateTimerDisplay();
+            
+            gameState.timer = setInterval(() => {
+                gameState.timerValue--;
+                updateTimerDisplay();
+                
+                if (gameState.timerValue <= 10) {
+                    document.getElementById('timerDisplay').classList.add('warning');
+                }
+                
+                if (gameState.timerValue <= 0) {
+                    clearInterval(gameState.timer);
+                    endLevel(false);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timerValue').textContent = gameState.timerValue;
+        }
+
+        // ==================== FIN DE NIVEL ====================
+        function endLevel(victory) {
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+            }
+
+            if (victory) {
+                const timeElapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+                const accuracy = gameState.correctAnswers / gameState.totalWordsInLevel;
+                
+                let stars = 1;
+                if (accuracy >= 0.8) stars = 2;
+                if (accuracy >= 0.95 && gameState.lives === 3) stars = 3;
+                
+                gameState.stars += stars;
+                
+                const progress = gameState.worldsProgress[gameState.currentWorld];
+                if (gameState.currentLevel > progress.levelsCompleted) {
+                    progress.levelsCompleted = gameState.currentLevel;
+                }
+                progress.starsPerLevel[gameState.currentLevel] = Math.max(
+                    progress.starsPerLevel[gameState.currentLevel] || 0,
+                    stars
+                );
+
+                // Desbloquear siguiente mundo
+                const world = WORLDS.find(w => w.id === gameState.currentWorld);
+                if (gameState.currentLevel === world.levels && !progress.completed) {
+                    progress.completed = true;
+                    const nextWorld = gameState.worldsProgress[gameState.currentWorld + 1];
+                    if (nextWorld) {
+                        nextWorld.unlocked = true;
+                    }
+                }
+
+                showResults(stars, timeElapsed);
+            } else {
+                showGameOver();
+            }
+            
+            updateUI();
+        }
+
+        function showResults(stars, time) {
+            const overlay = document.getElementById('resultsOverlay');
+            document.getElementById('resultsStars').innerHTML = renderStars(stars, 3);
+            document.getElementById('resultCorrect').textContent = `${gameState.correctAnswers}/${gameState.totalWordsInLevel}`;
+            document.getElementById('resultCoins').textContent = `+${gameState.correctAnswers * 10} 🪙`;
+            document.getElementById('resultTime').textContent = `${time}s`;
+            overlay.classList.add('show');
+            
+            createConfetti();
+            celebrateCapitulin();
+        }
+
+        function showGameOver() {
+            document.getElementById('gameoverOverlay').classList.add('show');
+        }
+
+        function exitLevel() {
+            document.getElementById('resultsOverlay').classList.remove('show');
+            document.getElementById('gameoverOverlay').classList.remove('show');
+            showScreen('levelsScreen');
+            renderLevels();
+        }
+
+        function nextLevel() {
+            document.getElementById('resultsOverlay').classList.remove('show');
+            const world = WORLDS.find(w => w.id === gameState.currentWorld);
+            
+            if (gameState.currentLevel < world.levels) {
+                startLevel(gameState.currentLevel + 1, gameState.currentLevel + 1 === world.levels);
+            } else {
+                exitLevel();
+            }
+        }
+
+        function retryLevel() {
+            document.getElementById('gameoverOverlay').classList.remove('show');
+            const world = WORLDS.find(w => w.id === gameState.currentWorld);
+            startLevel(gameState.currentLevel, gameState.currentLevel === world.levels);
+        }
+
+        // ==================== CAPITULÍN ====================
+        function capitulinSay(message) {
+            const speech = document.getElementById('capitulinSpeech');
+            speech.textContent = message;
+            speech.classList.add('show');
+            
+            setTimeout(() => {
+                speech.classList.remove('show');
+            }, 3000);
+        }
+
+        function capitulinTalk() {
+            const phrases = CAPITULIN_PHRASES.welcome;
+            capitulinSay(phrases[Math.floor(Math.random() * phrases.length)]);
+        }
+
+        function celebrateCapitulin() {
+            const mascot = document.getElementById('capitulinMascot');
+            mascot.classList.add('celebrating');
+            capitulinSay(CAPITULIN_PHRASES.correct[Math.floor(Math.random() * CAPITULIN_PHRASES.correct.length)]);
+            
+            setTimeout(() => {
+                mascot.classList.remove('celebrating');
+            }, 500);
+        }
+
+        // ==================== UTILIDADES ====================
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function splitIntoSyllables(word) {
+            // Algoritmo simplificado para español
+            const vowels = 'aeiouáéíóúü';
+            const syllables = [];
+            let current = '';
+            
+            for (let i = 0; i < word.length; i++) {
+                current += word[i];
+                const isVowel = vowels.includes(word[i].toLowerCase());
+                const nextIsVowel = i < word.length - 1 && vowels.includes(word[i + 1].toLowerCase());
+                
+                if (isVowel && !nextIsVowel && current.length > 0) {
+                    if (i < word.length - 1) {
+                        // Verificar consonantes al final
+                        if (!vowels.includes(word[i + 1].toLowerCase())) {
+                            current += word[i + 1];
+                            i++;
+                        }
+                    }
+                    syllables.push(current);
+                    current = '';
+                }
+            }
+            
+            if (current.length > 0) {
+                if (syllables.length > 0) {
+                    syllables[syllables.length - 1] += current;
+                } else {
+                    syllables.push(current);
+                }
+            }
+            
+            // Si solo hay una sílaba, dividir a la mitad
+            if (syllables.length === 1 && syllables[0].length >= 4) {
+                const mid = Math.ceil(syllables[0].length / 2);
+                return [syllables[0].slice(0, mid), syllables[0].slice(mid)];
+            }
+            
+            return syllables.length > 0 ? syllables : [word];
+        }
+
+        function createConfetti() {
+            const colors = ['#FF6B35', '#4ECDC4', '#FFE66D', '#FF6B6B', '#7BC950', '#9B59B6'];
+            const container = document.createElement('div');
+            container.className = 'confetti';
+            document.body.appendChild(container);
+
+            for (let i = 0; i < 50; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + 'vw';
+                piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDelay = Math.random() * 0.5 + 's';
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                container.appendChild(piece);
+            }
+
+            setTimeout(() => container.remove(), 3000);
+        }
+
+        // ==================== INICIALIZACIÓN ====================
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 2000);
+            
+            // Cargar progreso guardado
+            const saved = localStorage.getItem('capitulinProgress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.assign(gameState, data);
+                updateUI();
+            }
+
+            // Guardar progreso periódicamente
+            setInterval(() => {
+                localStorage.setItem('capitulinProgress', JSON.stringify({
+                    coins: gameState.coins,
+                    stars: gameState.stars,
+                    playerLevel: gameState.playerLevel,
+                    worldsProgress: gameState.worldsProgress
+                }));
+            }, 5000);
+        };
+    </script>
+</body>
+</html>
