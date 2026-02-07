@@ -1579,6 +1579,62 @@
             }, 50);
         }
         
+        // Función especial para leer palabras en los retos
+        function speakWord(word) {
+            // En el mundo 1 (vocales), deletrear letra por letra con pausas
+            if (gameState.currentWorld === 1) {
+                synth.cancel();
+                
+                const speakBtn = document.querySelector('.speak-button');
+                if (speakBtn) {
+                    speakBtn.classList.add('speaking');
+                }
+                
+                const letters = word.split('');
+                let delay = 0;
+                
+                letters.forEach((letter, index) => {
+                    setTimeout(() => {
+                        if (!voicesLoaded || !spanishVoice) {
+                            initVoices();
+                        }
+                        
+                        const utterance = new SpeechSynthesisUtterance(letter);
+                        
+                        if (spanishVoice) {
+                            utterance.voice = spanishVoice;
+                        }
+                        
+                        utterance.lang = 'es-ES';
+                        utterance.rate = 0.7;
+                        utterance.pitch = 1.1;
+                        utterance.volume = 1;
+                        
+                        // Cuando termine la última letra, quitar clase speaking
+                        if (index === letters.length - 1) {
+                            utterance.onend = () => {
+                                if (speakBtn) {
+                                    speakBtn.classList.remove('speaking');
+                                }
+                            };
+                            utterance.onerror = () => {
+                                if (speakBtn) {
+                                    speakBtn.classList.remove('speaking');
+                                }
+                            };
+                        }
+                        
+                        synth.speak(utterance);
+                    }, delay);
+                    
+                    delay += 400; // 400ms entre cada letra
+                });
+            } else {
+                // En otros mundos, leer normalmente
+                speak(word);
+            }
+        }
+        
         // Debug: mostrar voz seleccionada en consola
         setTimeout(() => {
             console.log('Voz final configurada:', spanishVoice ? spanishVoice.name : 'ninguna');
@@ -1865,22 +1921,21 @@
             }
         }
 
-        // RETO: Cofre (lee la palabra)
+        // RETO: Cofre (intenta leer la palabra)
         function renderChestChallenge(container, word) {
             container.innerHTML = `
                 <div class="challenge-container">
                     <div class="challenge-type">🗝️ Cofre del Tesoro</div>
                     <div class="challenge-icon">📦</div>
-                    <p class="challenge-instruction">Escucha y lee esta palabra para abrir el cofre:</p>
+                    <p class="challenge-instruction">Intenta leer esta palabra para abrir el cofre:</p>
                     <div class="word-display">${word}</div>
-                    <button class="speak-button" onclick="speak('${word}')">🔊</button>
                     <div class="options-container">
-                        <button class="btn btn-primary" onclick="checkAnswer(true)">✓ ¡La sé!</button>
-                        <button class="btn btn-secondary" onclick="speak('${word}', 0.5)">🐢 Más lento</button>
+                        <button class="btn btn-primary" onclick="checkAnswer(true)">✓ ¡Ya la leí!</button>
+                        <button class="speak-button btn-secondary" onclick="speakWord('${word}')">🔊 Oír</button>
                     </div>
                 </div>
             `;
-            setTimeout(() => speak(word), 500);
+            // NO lee automáticamente - el niño debe intentar leerla primero
         }
 
         // RETO: Diana (selecciona la correcta)
@@ -1902,7 +1957,7 @@
                     <div class="challenge-type">🎯 Diana de Palabras</div>
                     <div class="challenge-icon">🎯</div>
                     <p class="challenge-instruction">Escucha y selecciona la palabra correcta:</p>
-                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <button class="speak-button" onclick="speakWord('${word}')" style="margin-bottom: 20px;">🔊</button>
                     <div class="options-container">
                         ${options.map(opt => `
                             <button class="option-btn" onclick="selectOption(this, '${opt}', '${word}')">${opt}</button>
@@ -1910,7 +1965,7 @@
                     </div>
                 </div>
             `;
-            setTimeout(() => speak(word), 500);
+            setTimeout(() => speakWord(word), 500);
         }
 
         // RETO: Sílabas (forma la palabra)
@@ -1923,7 +1978,7 @@
                     <div class="challenge-type">🧩 Puzzle de Sílabas</div>
                     <div class="challenge-icon">🧩</div>
                     <p class="challenge-instruction">Escucha y ordena las sílabas:</p>
-                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <button class="speak-button" onclick="speakWord('${word}')" style="margin-bottom: 20px;">🔊</button>
                     <div class="syllables-container" id="syllablesSource">
                         ${shuffledSyllables.map((syl, i) => `
                             <div class="syllable-piece" onclick="selectSyllable(this)" data-syllable="${syl}">${syl}</div>
@@ -1933,7 +1988,7 @@
                     <button class="btn btn-primary" onclick="checkSyllables('${word}')" style="margin-top: 20px;">✓ Comprobar</button>
                 </div>
             `;
-            setTimeout(() => speak(word), 500);
+            setTimeout(() => speakWord(word), 500);
         }
 
         let selectedSyllables = [];
@@ -1998,7 +2053,7 @@
                     <div class="challenge-type">🌉 Puente Roto</div>
                     <div class="challenge-icon">🌉</div>
                     <p class="challenge-instruction">Completa la palabra para cruzar:</p>
-                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <button class="speak-button" onclick="speakWord('${word}')" style="margin-bottom: 20px;">🔊</button>
                     <div class="word-with-gap">${displayWord}</div>
                     <div class="options-container">
                         ${options.map(opt => `
@@ -2007,7 +2062,7 @@
                     </div>
                 </div>
             `;
-            setTimeout(() => speak(word), 500);
+            setTimeout(() => speakWord(word), 500);
         }
 
         function selectBridgeOption(button, selected, correct) {
@@ -2043,7 +2098,7 @@
                     <div class="challenge-type">🦜 Loro Parlanchín</div>
                     <div class="challenge-icon">🦜</div>
                     <p class="challenge-instruction">El loro dice una palabra. ¡Selecciona cuál es!</p>
-                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <button class="speak-button" onclick="speakWord('${word}')" style="margin-bottom: 20px;">🔊</button>
                     <div class="options-container">
                         ${options.map(opt => `
                             <button class="option-btn" onclick="selectOption(this, '${opt}', '${word}')">${opt}</button>
@@ -2051,7 +2106,7 @@
                     </div>
                 </div>
             `;
-            setTimeout(() => speak(word), 500);
+            setTimeout(() => speakWord(word), 500);
         }
 
         // RETO: Jefe
@@ -2078,7 +2133,7 @@
                         </div>
                     </div>
                     <p class="challenge-instruction">¡Lee rápido para derrotar al jefe!</p>
-                    <button class="speak-button" onclick="speak('${word}')" style="margin-bottom: 20px;">🔊</button>
+                    <button class="speak-button" onclick="speakWord('${word}')" style="margin-bottom: 20px;">🔊</button>
                     <div class="options-container">
                         ${options.map(opt => `
                             <button class="option-btn" onclick="selectBossOption(this, '${opt}', '${word}')">${opt}</button>
@@ -2086,7 +2141,7 @@
                     </div>
                 </div>
             `;
-            setTimeout(() => speak(word), 300);
+            setTimeout(() => speakWord(word), 300);
         }
 
         function selectBossOption(button, selected, correct) {
