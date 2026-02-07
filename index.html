@@ -1382,31 +1382,38 @@
         const WORD_BANK = {
             1: { // Vocales
                 letters: ['a', 'e', 'i', 'o', 'u'],
-                words: ['a', 'e', 'i', 'o', 'u', 'ea', 'eo', 'ou', 'ai', 'au', 'ei', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'ua', 'ue', 'ui', 'uo']
+                words: ['a', 'e', 'i', 'o', 'u', 'ea', 'eo', 'ou', 'ai', 'au', 'ei', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'ua', 'ue', 'ui', 'uo'],
+                inversas: [] // Mundo 1 no tiene inversas
             },
             2: { // + M, P
                 letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p'],
-                words: ['mamá', 'papá', 'mapa', 'ama', 'amo', 'mimo', 'mima', 'puma', 'pipa', 'pepe', 'pupa', 'memo', 'pomo', 'papi', 'mami', 'aupa', 'upa', 'pia', 'pío', 'mío']
+                words: ['mamá', 'papá', 'mapa', 'ama', 'amo', 'mimo', 'mima', 'puma', 'pipa', 'pepe', 'pupa', 'memo', 'pomo', 'papi', 'mami', 'aupa', 'upa', 'pia', 'pío', 'mío'],
+                inversas: ['am', 'em', 'ap', 'um', 'op'] // 5 inversas básicas
             },
             3: { // + S, L
                 letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l'],
-                words: ['mesa', 'sala', 'pala', 'suma', 'peso', 'oso', 'ala', 'sol', 'sal', 'mula', 'lima', 'lupa', 'lama', 'liso', 'masa', 'pelo', 'piel', 'miel', 'piso', 'sopa', 'sapo', 'lapo', 'palo', 'malo', 'polo', 'mole', 'silo', 'pesa', 'losa', 'isla']
+                words: ['mesa', 'sala', 'pala', 'suma', 'peso', 'oso', 'ala', 'sol', 'sal', 'mula', 'lima', 'lupa', 'lama', 'liso', 'masa', 'pelo', 'piel', 'miel', 'piso', 'sopa', 'sapo', 'lapo', 'palo', 'malo', 'polo', 'mole', 'silo', 'pesa', 'losa', 'isla'],
+                inversas: ['as', 'es', 'al', 'is', 'ol', 'us'] // 6 inversas nuevas
             },
             4: { // + T, N
                 letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l', 't', 'n'],
-                words: ['tapa', 'pato', 'meta', 'nota', 'luna', 'mono', 'nata', 'nena', 'toma', 'tela', 'lata', 'seta', 'mano', 'pan', 'son', 'tan', 'ten', 'sin', 'tos', 'tío', 'nene', 'nata', 'manta', 'lente', 'planta', 'tonto', 'lento', 'monte', 'pinta', 'punta', 'menta', 'tinta', 'antes', 'tanto', 'santo', 'peine', 'patín', 'melón', 'limón', 'salón', 'tapón', 'sillón', 'maleta', 'paleta', 'pelota', 'tomate', 'patata']
+                words: ['tapa', 'pato', 'meta', 'nota', 'luna', 'mono', 'nata', 'nena', 'toma', 'tela', 'lata', 'seta', 'mano', 'pan', 'son', 'tan', 'ten', 'sin', 'tos', 'tío', 'nene', 'nata', 'manta', 'lente', 'planta', 'tonto', 'lento', 'monte', 'pinta', 'punta', 'menta', 'tinta', 'antes', 'tanto', 'santo', 'peine', 'patín', 'melón', 'limón', 'salón', 'tapón', 'sillón', 'maleta', 'paleta', 'pelota', 'tomate', 'patata'],
+                inversas: ['an', 'en', 'at', 'in', 'on', 'ut'] // 6 inversas nuevas
             },
             5: { // + D, B, C (ca, co, cu)
                 letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l', 't', 'n', 'd', 'b', 'c'],
-                words: ['dedo', 'dado', 'día', 'dos', 'don', 'den', 'boca', 'bola', 'bota', 'bueno', 'banco', 'balón', 'botón', 'cama', 'casa', 'cuna', 'copa', 'codo', 'cono', 'col', 'come', 'cosa', 'boda', 'nido', 'moda', 'todo', 'cada', 'capo', 'saco', 'poco', 'loco', 'taco', 'disco', 'casco', 'duende', 'conde', 'dama', 'diana', 'dibujo', 'cubo', 'cola', 'cuento', 'comida', 'camino', 'camisa', 'cocina', 'caballo', 'calabaza']
+                words: ['dedo', 'dado', 'día', 'dos', 'don', 'den', 'boca', 'bola', 'bota', 'bueno', 'banco', 'balón', 'botón', 'cama', 'casa', 'cuna', 'copa', 'codo', 'cono', 'col', 'come', 'cosa', 'boda', 'nido', 'moda', 'todo', 'cada', 'capo', 'saco', 'poco', 'loco', 'taco', 'disco', 'casco', 'duende', 'conde', 'dama', 'diana', 'dibujo', 'cubo', 'cola', 'cuento', 'comida', 'camino', 'camisa', 'cocina', 'caballo', 'calabaza'],
+                inversas: ['ad', 'ob', 'ec', 'id', 'uc'] // 5 inversas nuevas
             },
             6: { // + R (suave), RR
                 letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l', 't', 'n', 'd', 'b', 'c', 'r'],
-                words: ['pera', 'cara', 'oro', 'ara', 'aro', 'era', 'mora', 'loro', 'toro', 'coro', 'puro', 'muro', 'caro', 'raro', 'para', 'pero', 'cura', 'dura', 'perro', 'carro', 'torre', 'barro', 'burro', 'gorra', 'porra', 'tierra', 'sierra', 'rosa', 'rana', 'rata', 'remo', 'ropa', 'rico', 'rama', 'rueda', 'risa', 'ratón', 'rincón', 'rápido', 'torero', 'dinero', 'carrera', 'barrera', 'corona', 'tesoro', 'pirata', 'marinero']
+                words: ['pera', 'cara', 'oro', 'ara', 'aro', 'era', 'mora', 'loro', 'toro', 'coro', 'puro', 'muro', 'caro', 'raro', 'para', 'pero', 'cura', 'dura', 'perro', 'carro', 'torre', 'barro', 'burro', 'gorra', 'porra', 'tierra', 'sierra', 'rosa', 'rana', 'rata', 'remo', 'ropa', 'rico', 'rama', 'rueda', 'risa', 'ratón', 'rincón', 'rápido', 'torero', 'dinero', 'carrera', 'barrera', 'corona', 'tesoro', 'pirata', 'marinero'],
+                inversas: ['ar', 'er', 'ir', 'or', 'ur'] // 5 inversas nuevas
             },
             7: { // + Trabadas (pl, pr, bl, br, cl, cr, fl, fr, gl, gr, tr, dr)
                 letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 'l', 't', 'n', 'd', 'b', 'c', 'r', 'f', 'g'],
-                words: ['plato', 'pluma', 'plano', 'plata', 'pleno', 'primo', 'prueba', 'precio', 'prisa', 'prado', 'blusa', 'blanco', 'blando', 'bruja', 'brisa', 'brazo', 'brote', 'bruto', 'clase', 'claro', 'clima', 'club', 'crema', 'cruz', 'crudo', 'criado', 'flaco', 'flor', 'flan', 'flauta', 'fruta', 'frío', 'frase', 'freno', 'globo', 'gloria', 'grande', 'grano', 'gratis', 'grupo', 'grillo', 'tren', 'tres', 'truco', 'triste', 'trigo', 'drama', 'dragón', 'cofre', 'tesoro', 'piedra', 'palabra', 'problema', 'trabajo']
+                words: ['plato', 'pluma', 'plano', 'plata', 'pleno', 'primo', 'prueba', 'precio', 'prisa', 'prado', 'blusa', 'blanco', 'blando', 'bruja', 'brisa', 'brazo', 'brote', 'bruto', 'clase', 'claro', 'clima', 'club', 'crema', 'cruz', 'crudo', 'criado', 'flaco', 'flor', 'flan', 'flauta', 'fruta', 'frío', 'frase', 'freno', 'globo', 'gloria', 'grande', 'grano', 'gratis', 'grupo', 'grillo', 'tren', 'tres', 'truco', 'triste', 'trigo', 'drama', 'dragón', 'cofre', 'tesoro', 'piedra', 'palabra', 'problema', 'trabajo'],
+                inversas: ['af', 'ef', 'ag', 'ig', 'og'] // 5 inversas nuevas
             }
         };
 
@@ -1441,6 +1448,7 @@
             currentWorld: 1,
             currentLevel: 1,
             worldsProgress: {},
+            inversasProgress: {}, // Progreso de sílabas inversas
             currentChallenge: null,
             lives: 3,
             wordsCompleted: 0,
@@ -1460,6 +1468,18 @@
                 levelsCompleted: 0,
                 starsPerLevel: {}
             };
+            
+            // Inicializar progreso de inversas
+            gameState.inversasProgress[world.id] = {};
+            const worldBank = WORD_BANK[world.id];
+            if (worldBank && worldBank.inversas) {
+                worldBank.inversas.forEach(inversa => {
+                    gameState.inversasProgress[world.id][inversa] = {
+                        timesCorrect: 0,
+                        unlocked: false
+                    };
+                });
+            }
         });
 
         // ==================== SÍNTESIS DE VOZ ====================
@@ -1873,25 +1893,44 @@
             }
 
             const worldBank = WORD_BANK[gameState.currentWorld];
-            const words = worldBank.words;
-            const word = words[Math.floor(Math.random() * words.length)];
+            let word;
+            let isInversa = false;
+            let inversaProgress = null;
+            
+            // Decidir si usar inversa (30% probabilidad) solo si el mundo tiene inversas
+            if (!isBoss && worldBank.inversas && worldBank.inversas.length > 0 && Math.random() < 0.3) {
+                // Seleccionar una inversa del mundo actual
+                const inversas = worldBank.inversas;
+                word = inversas[Math.floor(Math.random() * inversas.length)];
+                isInversa = true;
+                inversaProgress = gameState.inversasProgress[gameState.currentWorld][word];
+            } else {
+                // Palabra normal
+                const words = worldBank.words;
+                word = words[Math.floor(Math.random() * words.length)];
+            }
 
             let challengeType;
             if (isBoss) {
                 challengeType = BOSS_CHALLENGE;
             } else {
-                // Variar tipos de reto
-                const availableTypes = ['chest', 'target'];
-                if (word.length >= 4) {
-                    availableTypes.push('syllables', 'bridge');
+                // Si es inversa nueva o con menos de 2 aciertos → SOLO Diana
+                if (isInversa && inversaProgress && inversaProgress.timesCorrect < 2) {
+                    challengeType = 'target'; // Diana
+                } else {
+                    // Variar tipos de reto
+                    const availableTypes = ['chest', 'target'];
+                    if (word.length >= 4) {
+                        availableTypes.push('syllables', 'bridge');
+                    }
+                    if (gameState.currentWorld >= 2) {
+                        availableTypes.push('parrot');
+                    }
+                    challengeType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
                 }
-                if (gameState.currentWorld >= 2) {
-                    availableTypes.push('parrot');
-                }
-                challengeType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
             }
 
-            gameState.currentChallenge = { word, type: challengeType };
+            gameState.currentChallenge = { word, type: challengeType, isInversa };
 
             renderChallenge(challengeType, word, isBoss);
         }
@@ -2182,6 +2221,20 @@
         function handleCorrectAnswer(isBoss = false) {
             gameState.wordsCompleted++;
             gameState.correctAnswers++;
+            
+            // Si es una inversa, actualizar su progreso
+            if (gameState.currentChallenge.isInversa) {
+                const word = gameState.currentChallenge.word;
+                const inversaProgress = gameState.inversasProgress[gameState.currentWorld][word];
+                if (inversaProgress) {
+                    inversaProgress.timesCorrect++;
+                    // Desbloquear después de 2 aciertos
+                    if (inversaProgress.timesCorrect >= 2 && !inversaProgress.unlocked) {
+                        inversaProgress.unlocked = true;
+                        console.log(`🔓 Inversa "${word}" desbloqueada para todos los retos!`);
+                    }
+                }
+            }
             
             const coinsEarned = isBoss ? 15 : 10;
             gameState.coins += coinsEarned;
@@ -2495,6 +2548,27 @@
                             starsPerLevel: {}
                         };
                     }
+                    
+                    // Asegurar que inversasProgress esté inicializado
+                    if (!data.inversasProgress) {
+                        data.inversasProgress = {};
+                    }
+                    if (!data.inversasProgress[world.id]) {
+                        data.inversasProgress[world.id] = {};
+                    }
+                    
+                    // Inicializar inversas que falten
+                    const worldBank = WORD_BANK[world.id];
+                    if (worldBank && worldBank.inversas) {
+                        worldBank.inversas.forEach(inversa => {
+                            if (!data.inversasProgress[world.id][inversa]) {
+                                data.inversasProgress[world.id][inversa] = {
+                                    timesCorrect: 0,
+                                    unlocked: false
+                                };
+                            }
+                        });
+                    }
                 });
                 
                 Object.assign(gameState, data);
@@ -2507,7 +2581,8 @@
                     coins: gameState.coins,
                     stars: gameState.stars,
                     playerLevel: gameState.playerLevel,
-                    worldsProgress: gameState.worldsProgress
+                    worldsProgress: gameState.worldsProgress,
+                    inversasProgress: gameState.inversasProgress
                 }));
             }, 5000);
         };
