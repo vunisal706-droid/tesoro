@@ -1382,7 +1382,7 @@
         const WORD_BANK = {
             1: { // Vocales
                 letters: ['a', 'e', 'i', 'o', 'u'],
-                words: ['a', 'e', 'i', 'o', 'u', 'oí', 'ío', 'ea', 'eo', 'ou', 'ai', 'au', 'ei', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'ua', 'ue', 'ui', 'uo']
+                words: ['a', 'e', 'i', 'o', 'u', 'ea', 'eo', 'ou', 'ai', 'au', 'ei', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'ua', 'ue', 'ui', 'uo']
             },
             2: { // + M, P
                 letters: ['a', 'e', 'i', 'o', 'u', 'm', 'p'],
@@ -2262,9 +2262,16 @@
                 const world = WORLDS.find(w => w.id === gameState.currentWorld);
                 if (gameState.currentLevel === world.levels && !progress.completed) {
                     progress.completed = true;
-                    const nextWorld = gameState.worldsProgress[gameState.currentWorld + 1];
-                    if (nextWorld) {
-                        nextWorld.unlocked = true;
+                    
+                    // Buscar el siguiente mundo en el array WORLDS
+                    const currentIndex = WORLDS.findIndex(w => w.id === gameState.currentWorld);
+                    if (currentIndex < WORLDS.length - 1) {
+                        const nextWorldId = WORLDS[currentIndex + 1].id;
+                        const nextWorldProgress = gameState.worldsProgress[nextWorldId];
+                        if (nextWorldProgress) {
+                            nextWorldProgress.unlocked = true;
+                            console.log(`🔓 Mundo ${nextWorldId} desbloqueado!`);
+                        }
                     }
                 }
 
@@ -2422,6 +2429,19 @@
             const saved = localStorage.getItem('capitulinProgress');
             if (saved) {
                 const data = JSON.parse(saved);
+                
+                // Asegurar que todos los mundos estén inicializados
+                WORLDS.forEach(world => {
+                    if (!data.worldsProgress[world.id]) {
+                        data.worldsProgress[world.id] = {
+                            unlocked: world.id === 1,
+                            completed: false,
+                            levelsCompleted: 0,
+                            starsPerLevel: {}
+                        };
+                    }
+                });
+                
                 Object.assign(gameState, data);
                 updateUI();
             }
