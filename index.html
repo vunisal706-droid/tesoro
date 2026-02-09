@@ -31,7 +31,7 @@
 
         body {
             font-family: var(--font-body);
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: linear-gradient(135deg, #006994 0%, #4ECDC4 50%, #87CEEB 100%);
             min-height: 100vh;
             overflow-x: hidden;
             color: var(--color-light);
@@ -1193,9 +1193,266 @@
             color: rgba(255,255,255,0.7);
             margin-bottom: 30px;
         }
-    </style>
+    
+        /* ============ NUEVOS ESTILOS TROPICALES ============ */
+        :root {
+            --ocean-deep: #006994;
+            --ocean-light: #4ECDC4;
+            --sand: #F4E4C1;
+            --sand-dark: #E6D5B8;
+            --palm-green: #2D5016;
+            --palm-light: #7BC950;
+            --coral: #FF6B6B;
+            --sunset-orange: #FF8C42;
+            --sunset-pink: #FF6B9D;
+            --tropical-yellow: #FFE66D;
+            --sky-blue: #87CEEB;
+        }
+
+        /* Fondos animados de océano */
+        .ocean-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(180deg, #87CEEB 0%, #4ECDC4 40%, #006994 100%);
+            overflow: hidden;
+        }
+
+        .ocean-waves {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,60 C200,90 400,30 600,60 C800,90 1000,30 1200,60 L1200,120 L0,120 Z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E");
+            background-size: 600px 100px;
+            animation: wave-move 8s linear infinite;
+        }
+
+        .ocean-waves:nth-child(2) {
+            bottom: 10px;
+            opacity: 0.5;
+            animation-duration: 10s;
+        }
+
+        .ocean-waves:nth-child(3) {
+            bottom: 20px;
+            opacity: 0.3;
+            animation-duration: 12s;
+        }
+
+        @keyframes wave-move {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-600px); }
+        }
+
+        /* Burbujas tropicales */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            animation: float-up 8s ease-in infinite;
+        }
+
+        @keyframes float-up {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+
+        /* Estilos mejorados para tarjetas de mundos */
+        .world-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(244,228,193,0.9));
+            border: 4px solid var(--tropical-yellow);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,230,109,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .world-card::before {
+            content: '🌴';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 40px;
+            opacity: 0.3;
+            transform: rotate(15deg);
+        }
+
+        .world-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--ocean-light), var(--ocean-deep));
+        }
+
+        .world-card:hover:not(.locked) {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--sunset-orange);
+            box-shadow: 0 20px 40px rgba(255,140,66,0.4);
+        }
+
+        .world-card.locked {
+            opacity: 0.7;
+            filter: grayscale(0.3);
+            border-color: #ccc;
+        }
+
+        .world-card.locked::after {
+            display: none;
+        }
+
+        /* Nuevos colores para cada mundo */
+        .world-card[data-world="1"] { background: linear-gradient(145deg, #FFE5B4, #FFDAB9); border-color: #FF8C42; }
+        .world-card[data-world="2"] { background: linear-gradient(145deg, #E0F7FA, #B2EBF2); border-color: #00BCD4; }
+        .world-card[data-world="3"] { background: linear-gradient(145deg, #E8F5E9, #C8E6C9); border-color: #4CAF50; }
+        .world-card[data-world="4"] { background: linear-gradient(145deg, #FFF3E0, #FFE0B2); border-color: #FF9800; }
+        .world-card[data-world="5"] { background: linear-gradient(145deg, #F3E5F5, #E1BEE7); border-color: #9C27B0; }
+        .world-card[data-world="6"] { background: linear-gradient(145deg, #FFEBEE, #FFCDD2); border-color: #F44336; }
+        .world-card[data-world="7"] { background: linear-gradient(145deg, #FFF9C4, #FFF59D); border-color: #FFD700; }
+
+        /* Pantalla de juego con temática de isla */
+        .game-area {
+            background: linear-gradient(180deg, rgba(135,206,235,0.3) 0%, rgba(78,205,196,0.4) 50%, rgba(0,105,148,0.5) 100%);
+            border: 4px solid var(--sand);
+            box-shadow: inset 0 0 50px rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .game-area::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        /* Decoraciones de isla */
+        .island-decoration {
+            position: absolute;
+            font-size: 30px;
+            opacity: 0.4;
+            animation: float-decoration 4s ease-in-out infinite;
+        }
+
+        @keyframes float-decoration {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        /* Botones con estilo tropical */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--sunset-orange), var(--coral));
+            border: 3px solid var(--tropical-yellow);
+            box-shadow: 0 8px 25px rgba(255,140,66,0.5);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--ocean-light), var(--ocean-deep));
+            border: 3px solid var(--sky-blue);
+            box-shadow: 0 8px 25px rgba(78,205,196,0.5);
+        }
+
+        /* Header con arena y mar */
+        .game-header {
+            background: linear-gradient(135deg, rgba(244,228,193,0.9), rgba(230,213,184,0.9));
+            border: 3px solid var(--sand-dark);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Pantalla de inicio más colorida */
+        .home-screen {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,230,109,0.1));
+            border-radius: 30px;
+            padding: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        /* Nodos de niveles con colores de islas */
+        .level-node.available {
+            background: linear-gradient(135deg, var(--sunset-orange), var(--coral));
+            border: 4px solid var(--tropical-yellow);
+            box-shadow: 0 5px 20px rgba(255,140,66,0.6);
+        }
+
+        .level-node.completed {
+            background: linear-gradient(135deg, var(--palm-light), var(--palm-green));
+            border: 4px solid #ADFF2F;
+        }
+
+        .level-node.boss {
+            background: linear-gradient(135deg, #9C27B0, #E91E63);
+            border: 4px solid #FFD700;
+            animation: bossGlow 2s ease-in-out infinite, float-boss 3s ease-in-out infinite;
+        }
+
+        @keyframes float-boss {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Feedback más colorido */
+        .feedback-correct .feedback-text {
+            color: var(--palm-green);
+            text-shadow: 0 0 20px rgba(123,201,80,0.5);
+        }
+
+        .feedback-incorrect .feedback-text {
+            color: var(--coral);
+            text-shadow: 0 0 20px rgba(255,107,107,0.5);
+        }
+
+        /* Contenedor principal con fondo de playa */
+        .app-container {
+            background: linear-gradient(180deg, rgba(135,206,235,0.2) 0%, rgba(244,228,193,0.3) 100%);
+            border-radius: 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.3);
+        }
+
+        /* Títulos con sombra de playa */
+        .screen-title {
+            color: var(--ocean-deep);
+            text-shadow: 2px 2px 0px var(--sand), 4px 4px 0px rgba(0,0,0,0.1);
+            font-size: 2.5rem;
+        }
+
+        .game-title {
+            background: linear-gradient(135deg, var(--sunset-orange) 0%, var(--tropical-yellow) 50%, var(--sunset-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+</style>
+<base target="_blank">
 </head>
 <body>
+    <!-- Fondo de océano animado -->
+    <div class="ocean-bg">
+        <div class="ocean-waves"></div>
+        <div class="ocean-waves"></div>
+        <div class="ocean-waves"></div>
+        <!-- Burbujas decorativas -->
+        <div class="bubble" style="left: 10%; width: 20px; height: 20px; animation-delay: 0s;"></div>
+        <div class="bubble" style="left: 20%; width: 15px; height: 15px; animation-delay: 2s;"></div>
+        <div class="bubble" style="left: 70%; width: 25px; height: 25px; animation-delay: 4s;"></div>
+        <div class="bubble" style="left: 85%; width: 18px; height: 18px; animation-delay: 1s;"></div>
+        <div class="bubble" style="left: 40%; width: 22px; height: 22px; animation-delay: 3s;"></div>
+        <div class="bubble" style="left: 60%; width: 16px; height: 16px; animation-delay: 5s;"></div>
+    </div>
     <!-- Pantalla de carga -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-capitulin">🦊</div>
@@ -1270,6 +1527,13 @@
 
         <!-- PANTALLA DE MUNDOS -->
         <section class="screen worlds-screen" id="worldsScreen">
+            <!-- Decoraciones tropicales -->
+            <div class="island-decoration" style="top: 10%; left: 5%;">🌴</div>
+            <div class="island-decoration" style="top: 20%; right: 8%; animation-delay: 1s;">🏝️</div>
+            <div class="island-decoration" style="bottom: 15%; left: 10%; animation-delay: 2s;">🐚</div>
+            <div class="island-decoration" style="bottom: 20%; right: 5%; animation-delay: 0.5s;">⭐</div>
+            <div class="island-decoration" style="top: 50%; left: 3%; animation-delay: 1.5s;">🦀</div>
+            <div class="island-decoration" style="top: 40%; right: 3%; animation-delay: 2.5s;">🐠</div>
             <button class="btn btn-back btn-small" onclick="showScreen('homeScreen')" style="margin-bottom: 20px;">
                 ← Volver
             </button>
@@ -1281,6 +1545,11 @@
 
         <!-- PANTALLA DE NIVELES -->
         <section class="screen levels-screen" id="levelsScreen">
+            <!-- Decoraciones tropicales -->
+            <div class="island-decoration" style="top: 15%; left: 5%;">🌺</div>
+            <div class="island-decoration" style="top: 25%; right: 10%; animation-delay: 1s;">🥥</div>
+            <div class="island-decoration" style="bottom: 10%; left: 8%; animation-delay: 2s;">🐢</div>
+            <div class="island-decoration" style="bottom: 25%; right: 5%; animation-delay: 0.5s;">🌊</div>
             <button class="btn btn-back btn-small" onclick="showScreen('worldsScreen')" style="margin-bottom: 20px;">
                 ← Volver al Mapa
             </button>
@@ -1296,6 +1565,11 @@
 
         <!-- PANTALLA DE JUEGO -->
         <section class="screen game-screen" id="gameScreen">
+            <!-- Decoraciones tropicales -->
+            <div class="island-decoration" style="top: 10%; left: 3%; font-size: 25px;">🦜</div>
+            <div class="island-decoration" style="top: 15%; right: 5%; font-size: 20px; animation-delay: 1s;">🌴</div>
+            <div class="island-decoration" style="bottom: 20%; left: 5%; font-size: 22px; animation-delay: 2s;">🐡</div>
+            <div class="island-decoration" style="bottom: 15%; right: 3%; font-size: 18px; animation-delay: 0.5s;">🦑</div>
             <div class="game-hud">
                 <div class="hud-left">
                     <button class="btn btn-back btn-small" onclick="exitLevel()">✕</button>
@@ -1460,10 +1734,10 @@
             bossHealth: 100
         };
 
-        // Inicializar progreso de mundos
+        // Inicializar progreso de mundos - TODAS DESBLOQUEADAS
         WORLDS.forEach(world => {
             gameState.worldsProgress[world.id] = {
-                unlocked: world.id === 1,
+                unlocked: true, // Todas las islas desbloqueadas desde el inicio
                 completed: false,
                 levelsCompleted: 0,
                 starsPerLevel: {}
@@ -1784,7 +2058,8 @@
                 const maxStars = world.levels * 3;
 
                 const card = document.createElement('div');
-                card.className = `world-card ${progress.unlocked ? '' : 'locked'} ${progress.completed ? 'completed' : ''}`;
+                card.className = `world-card ${progress.completed ? 'completed' : ''}`;
+                card.setAttribute('data-world', world.id);
                 card.innerHTML = `
                     <span class="world-icon">${world.icon}</span>
                     <h3 class="world-name">${world.name}</h3>
@@ -1797,9 +2072,7 @@
                     </div>
                 `;
 
-                if (progress.unlocked) {
-                    card.onclick = () => selectWorld(world.id);
-                }
+                card.onclick = () => selectWorld(world.id); // Siempre clickable
 
                 grid.appendChild(card);
             });
