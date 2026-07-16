@@ -1042,6 +1042,57 @@
         }
 
         /* ============ EFECTOS ESPECIALES ============ */
+        /* ============ COMBO / RACHA ============ */
+        .combo-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #FF6B35, #FFB627);
+            color: #fff;
+            font-family: var(--font-title);
+            font-size: 1rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            box-shadow: 0 3px 10px rgba(255, 107, 53, 0.5);
+        }
+
+        .combo-pop {
+            animation: comboPop 0.4s ease-out;
+        }
+
+        @keyframes comboPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.35) rotate(-4deg); }
+            100% { transform: scale(1); }
+        }
+
+        .combo-banner {
+            font-family: var(--font-title);
+            font-size: 1.4rem;
+            color: #FF6B35;
+            background: #FFF3D6;
+            padding: 8px 20px;
+            border-radius: 16px;
+            margin: 8px 0;
+            animation: comboPop 0.5s ease-out;
+        }
+
+        .shake-wrong {
+            animation: shakeWrong 0.4s ease-in-out;
+        }
+
+        @keyframes shakeWrong {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-7px); }
+            80% { transform: translateX(7px); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .combo-pop, .combo-banner, .shake-wrong { animation: none !important; }
+        }
+
         .confetti {
             position: fixed;
             pointer-events: none;
@@ -1482,6 +1533,7 @@
                     <span class="resource-icon">⭐</span>
                     <span id="totalStars">0</span>
                 </div>
+                <div class="combo-badge" id="comboBadge" style="display: none;" aria-label="Racha de aciertos">🔥 <span>x0</span></div>
             </div>
         </header>
 
@@ -1731,7 +1783,9 @@
             startTime: null,
             timer: null,
             timerValue: 30,
-            bossHealth: 100
+            bossHealth: 100,
+            combo: 0,
+            bestCombo: 0
         };
 
         // Inicializar progreso de mundos - TODAS DESBLOQUEADAS
@@ -1756,6 +1810,63 @@
             }
         });
 
+        // ==================== EFECTOS DE SONIDO (WebAudio) ====================
+        let audioCtx = null;
+        function getAudioCtx() {
+            if (!audioCtx) {
+                try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; }
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+        
+        function tone(freq, start, dur, type = 'sine', vol = 0.18) {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.type = type;
+            o.frequency.value = freq;
+            g.gain.setValueAtTime(0, ctx.currentTime + start);
+            g.gain.linearRampToValueAtTime(vol, ctx.currentTime + start + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(ctx.currentTime + start);
+            o.stop(ctx.currentTime + start + dur + 0.05);
+        }
+        
+        function playSound(name) {
+            switch(name) {
+                case 'correct': // Arpegio alegre ascendente
+                    tone(523, 0, 0.15, 'triangle'); tone(659, 0.10, 0.15, 'triangle'); tone(784, 0.20, 0.25, 'triangle');
+                    break;
+                case 'combo': // Fanfarria corta de racha
+                    tone(659, 0, 0.12, 'square', 0.10); tone(784, 0.10, 0.12, 'square', 0.10);
+                    tone(988, 0.20, 0.12, 'square', 0.10); tone(1319, 0.30, 0.30, 'square', 0.12);
+                    break;
+                case 'wrong': // Dos notas descendentes suaves (sin ser desagradable)
+                    tone(330, 0, 0.20, 'sine', 0.14); tone(262, 0.18, 0.30, 'sine', 0.14);
+                    break;
+                case 'coin':
+                    tone(988, 0, 0.08, 'square', 0.08); tone(1319, 0.07, 0.15, 'square', 0.08);
+                    break;
+                case 'win': // Fanfarria de victoria
+                    [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.15, 0.20, 'triangle', 0.16));
+                    tone(1047, 0.65, 0.5, 'triangle', 0.18);
+                    break;
+                case 'lose':
+                    tone(392, 0, 0.25, 'sine', 0.12); tone(330, 0.25, 0.25, 'sine', 0.12); tone(262, 0.50, 0.45, 'sine', 0.12);
+                    break;
+                case 'click':
+                    tone(700, 0, 0.05, 'sine', 0.06);
+                    break;
+            }
+        }
+        
+        function vibrate(pattern) {
+            if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch(e) {} }
+        }
+
         // ==================== SÍNTESIS DE VOZ ====================
         const synth = window.speechSynthesis;
         let spanishVoice = null;
@@ -1777,13 +1888,17 @@
             
             // Buscar voces preferidas de Google/Microsoft que suenan mejor
             const preferredVoices = [
+                'Elvira Online (Natural)',   // Edge - la mejor voz es-ES
+                'Alvaro Online (Natural)',   // Edge
+                'Dalia Online (Natural)',    // Edge es-MX
+                'Online (Natural)',          // Cualquier voz neural de Microsoft
                 'Google español',
+                'Mónica',                    // iOS/macOS (calidad alta)
+                'Paulina',
                 'Microsoft Helena',
                 'Microsoft Laura',
-                'Mónica',
                 'Jorge',
-                'Diego',
-                'Paulina'
+                'Diego'
             ];
             
             // Primero buscar voces preferidas
@@ -1838,7 +1953,30 @@
         setTimeout(initVoices, 500);
         setTimeout(initVoices, 1000);
 
-        function speak(text, rate = 0.8) {
+        // ---- Pronunciación fonética para el TTS ----
+        // Las sílabas inversas ("am", "em", "as"...) se leen mal: el motor las
+        // interpreta como siglas o palabras inglesas. Solución: tilde en la vocal
+        // (fuerza lectura como palabra española tónica) + lectura más lenta.
+        const ACCENT_MAP = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú' };
+        const INVERSA_REGEX = /^[aeiou][bcdfglmnprst]$/;
+        
+        function getPronunciation(text) {
+            const w = text.toLowerCase().trim();
+            // Sílaba inversa (vocal + consonante): am → ám
+            if (INVERSA_REGEX.test(w)) {
+                return ACCENT_MAP[w[0]] + w[1];
+            }
+            // Palabras muy cortas tipo CVC (sol, pan, tos...) ya se leen bien
+            return text;
+        }
+        
+        function isInversaSyllable(text) {
+            return INVERSA_REGEX.test(text.toLowerCase().trim());
+        }
+        
+        let currentUtterance = null; // Evitar que Chrome recolecte el utterance a mitad
+        
+        function speak(text, rate = 0.8, pronounce = true) {
             // Cancelar cualquier habla anterior
             synth.cancel();
             
@@ -1847,7 +1985,9 @@
                 initVoices();
             }
             
-            const utterance = new SpeechSynthesisUtterance(text);
+            const spokenText = pronounce ? getPronunciation(text) : text;
+            const utterance = new SpeechSynthesisUtterance(spokenText);
+            currentUtterance = utterance;
             
             // Configurar voz española
             if (spanishVoice) {
@@ -1857,7 +1997,7 @@
             // IMPORTANTE: Forzar idioma español aunque no haya voz específica
             utterance.lang = 'es-ES';
             utterance.rate = rate;
-            utterance.pitch = 1.1;
+            utterance.pitch = 1.0; // Tono natural (1.1 distorsionaba la voz)
             utterance.volume = 1;
             
             const speakBtn = document.querySelector('.speak-button');
@@ -1870,7 +2010,36 @@
             // Pequeño retraso para asegurar que el cancel() se procesó
             setTimeout(() => {
                 synth.speak(utterance);
+                // Workaround del bug de Chrome que pausa el sintetizador
+                if (synth.paused) synth.resume();
             }, 50);
+        }
+        
+        // Lee una sílaba inversa una vez, algo más despacio de lo normal,
+        // para que se distinga la consonante final (p, t...).
+        // IMPORTANTE: hay que esperar ~80ms tras synth.cancel() o Chrome
+        // ignora el utterance y no suena nada.
+        function speakInversa(word) {
+            synth.cancel();
+            if (!voicesLoaded || !spanishVoice) initVoices();
+            
+            const speakBtn = document.querySelector('.speak-button');
+            if (speakBtn) speakBtn.classList.add('speaking');
+            
+            const spoken = getPronunciation(word);
+            setTimeout(() => {
+                const u = new SpeechSynthesisUtterance(spoken);
+                currentUtterance = u;
+                if (spanishVoice) u.voice = spanishVoice;
+                u.lang = 'es-ES';
+                u.rate = 0.65; // Más despacio que una palabra normal, sin resultar pesado
+                u.pitch = 1.0;
+                u.volume = 1;
+                u.onend = () => speakBtn && speakBtn.classList.remove('speaking');
+                u.onerror = () => speakBtn && speakBtn.classList.remove('speaking');
+                synth.speak(u);
+                if (synth.paused) synth.resume();
+            }, 80);
         }
         
         // Función especial para leer palabras en los retos
@@ -1923,6 +2092,9 @@
                     
                     delay += 400; // 400ms entre cada letra
                 });
+            } else if (isInversaSyllable(word)) {
+                // Sílabas inversas (am, em, as...): lectura especial repetida y lenta
+                speakInversa(word);
             } else {
                 // En otros mundos, leer normalmente
                 speak(word);
@@ -2143,8 +2315,10 @@
             gameState.totalWordsInLevel = isBoss ? 15 : 10;
             gameState.startTime = Date.now();
             gameState.bossHealth = 100;
+            gameState.combo = 0;
 
             showScreen('gameScreen');
+            updateComboDisplay();
             updateLivesDisplay();
             updateProgressDisplay();
 
@@ -2509,12 +2683,21 @@
                 }
             }
             
-            const coinsEarned = isBoss ? 15 : 10;
+            // Sistema de racha (combo): aciertos seguidos multiplican las monedas
+            gameState.combo++;
+            if (gameState.combo > gameState.bestCombo) gameState.bestCombo = gameState.combo;
+            const multiplier = gameState.combo >= 6 ? 3 : (gameState.combo >= 3 ? 2 : 1);
+            const coinsEarned = (isBoss ? 15 : 10) * multiplier;
             gameState.coins += coinsEarned;
 
-            showFeedback(true, coinsEarned);
+            playSound(multiplier > 1 ? 'combo' : 'correct');
+            setTimeout(() => playSound('coin'), 350);
+            vibrate(multiplier > 1 ? [40, 60, 40, 60, 80] : [50]);
+
+            showFeedback(true, coinsEarned, multiplier);
             celebrateCapitulin();
             updateUI();
+            updateComboDisplay();
             updateProgressDisplay();
 
             setTimeout(() => {
@@ -2530,7 +2713,18 @@
         function handleIncorrectAnswer(isBoss = false) {
             gameState.lives--;
             gameState.wordsCompleted++;
+            gameState.combo = 0;
             updateLivesDisplay();
+            updateComboDisplay();
+
+            playSound('wrong');
+            vibrate([80, 40, 80]);
+            const area = document.getElementById('gameArea');
+            if (area) {
+                area.classList.remove('shake-wrong');
+                void area.offsetWidth; // reiniciar animación
+                area.classList.add('shake-wrong');
+            }
 
             showFeedback(false, 0);
             capitulinSay(CAPITULIN_PHRASES.incorrect[Math.floor(Math.random() * CAPITULIN_PHRASES.incorrect.length)]);
@@ -2568,14 +2762,23 @@
             document.getElementById('progressFill').style.width = `${percent}%`;
         }
 
-        function showFeedback(correct, coins) {
+        const FEEDBACK_WORDS = {
+            correct: ['¡Correcto!', '¡Genial!', '¡Súper!', '¡Fantástico!', '¡Muy bien!', '¡Increíble!'],
+            incorrect: ['¡Casi!', '¡Uy!', '¡Casi casi!']
+        };
+        
+        function showFeedback(correct, coins, multiplier = 1) {
             const overlay = document.getElementById('feedbackOverlay');
             const content = document.getElementById('feedbackContent');
+            
+            const words = correct ? FEEDBACK_WORDS.correct : FEEDBACK_WORDS.incorrect;
+            const word = words[Math.floor(Math.random() * words.length)];
             
             content.className = `feedback-content ${correct ? 'feedback-correct' : 'feedback-incorrect'}`;
             content.innerHTML = `
                 <div class="feedback-icon">${correct ? '✨' : '💫'}</div>
-                <div class="feedback-text">${correct ? '¡Correcto!' : '¡Casi!'}</div>
+                <div class="feedback-text">${word}</div>
+                ${correct && multiplier > 1 ? `<div class="combo-banner">🔥 ¡RACHA x${multiplier}!</div>` : ''}
                 ${correct ? `<div class="coins-earned">+${coins} 🪙</div>` : ''}
             `;
             
@@ -2583,6 +2786,20 @@
             
             if (correct) {
                 createConfetti();
+            }
+        }
+        
+        function updateComboDisplay() {
+            const badge = document.getElementById('comboBadge');
+            if (!badge) return;
+            if (gameState.combo >= 2) {
+                badge.style.display = 'flex';
+                badge.innerHTML = `🔥 <span>x${gameState.combo}</span>`;
+                badge.classList.remove('combo-pop');
+                void badge.offsetWidth;
+                badge.classList.add('combo-pop');
+            } else {
+                badge.style.display = 'none';
             }
         }
 
@@ -2672,11 +2889,15 @@
             document.getElementById('resultTime').textContent = `${time}s`;
             overlay.classList.add('show');
             
+            playSound('win');
+            vibrate([60, 40, 60, 40, 120]);
             createConfetti();
+            if (stars === 3) setTimeout(createConfetti, 600); // Doble confeti con 3 estrellas
             celebrateCapitulin();
         }
 
         function showGameOver() {
+            playSound('lose');
             document.getElementById('gameoverOverlay').classList.add('show');
         }
 
